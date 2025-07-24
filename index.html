@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shed Organization Planner - Construction Tools</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h1>Shed Organization Planner</h1>
+                <span class="shed-info">10' × 14' Construction Shed</span>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn--secondary btn--sm" id="optimizeBtn">🎯 Optimize</button>
+                <button class="btn btn--primary btn--sm" id="saveBtn">💾 Save Layout</button>
+                <button class="btn btn--secondary btn--sm" id="loadBtn">📁 Load Layout</button>
+                <button class="btn btn--secondary btn--sm" id="exportPdfBtn">📄 Export PDF</button>
+                <button class="btn btn--secondary btn--sm" id="exportJsonBtn">💾 Export File</button>
+                <button class="btn btn--secondary btn--sm" id="undoBtn">↶ Undo</button>
+                <button class="btn btn--secondary btn--sm" id="redoBtn">↷ Redo</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Sidebar - Tools & Storage -->
+            <div class="sidebar sidebar--left">
+                <div class="sidebar-section">
+                    <h3>Storage Units</h3>
+                    <div class="storage-palette">
+                        <div class="palette-item" data-type="cabinet" data-width="36" data-height="24" draggable="true">
+                            <div class="palette-preview cabinet-preview">
+                                <div class="drawer-indicators">
+                                    <div class="drawer-line"></div>
+                                    <div class="drawer-line"></div>
+                                    <div class="drawer-line"></div>
+                                </div>
+                            </div>
+                            <span>Cabinet 36"×24"<br><small>4 Drawers</small></span>
+                        </div>
+                        <div class="palette-item" data-type="shelf" data-width="42" data-height="36" draggable="true">
+                            <div class="palette-preview shelf-preview"></div>
+                            <span>Fixed Shelf 42"×36"<br><small>Multi-level</small></span>
+                        </div>
+                        <div class="palette-item" data-type="moveable_shelf" data-width="24" data-height="42" draggable="true">
+                            <div class="palette-preview moveable-preview">
+                                <div class="wheel-indicators">
+                                    <div class="wheel"></div>
+                                    <div class="wheel"></div>
+                                </div>
+                            </div>
+                            <span>Mobile Shelf 24"×42"<br><small>With wheels</small></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Construction Tools</h3>
+                    <div class="tool-categories">
+                        <div class="category-tabs">
+                            <button class="tab-btn active" data-category="Hand Tools">Hand Tools</button>
+                            <button class="tab-btn" data-category="Power Tools">Power Tools</button>
+                            <button class="tab-btn" data-category="Plumbing">Plumbing</button>
+                            <button class="tab-btn" data-category="Electrical">Electrical</button>
+                            <button class="tab-btn" data-category="Fasteners">Hardware</button>
+                            <button class="tab-btn" data-category="Paints & Chemicals">Chemicals</button>
+                            <button class="tab-btn" data-category="Safety Equipment">Safety</button>
+                            <button class="tab-btn" data-category="Large Equipment">Large Items</button>
+                        </div>
+                        <div class="tool-list" id="toolList">
+                            <!-- Dynamic content -->
+                        </div>
+                        <button class="btn btn--primary btn--full-width" id="addCustomToolBtn">+ Add Miscellaneous Item</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div class="canvas-container">
+                <div class="canvas-controls">
+                    <button class="btn btn--sm" id="zoomIn">🔍+</button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="btn btn--sm" id="zoomOut">🔍-</button>
+                    <button class="btn btn--sm" id="toggleGrid">📏 Grid</button>
+                    <button class="btn btn--sm" id="clearAllBtn">🗑️ Clear All</button>
+                    <div class="canvas-info">
+                        <span>Click units to select • Double-click cabinets for drawer view</span>
+                    </div>
+                </div>
+                <div class="canvas-wrapper">
+                    <div class="canvas" id="canvas">
+                        <div class="grid-overlay" id="gridOverlay"></div>
+                        <div class="shed-outline">
+                            <div class="shed-dimensions">
+                                <span class="dimension-label width">14 feet</span>
+                                <span class="dimension-label height">10 feet</span>
+                            </div>
+                        </div>
+                        <div class="storage-units" id="storageUnits">
+                            <!-- Dynamic storage units will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - Properties & Info -->
+            <div class="sidebar sidebar--right">
+                <div class="sidebar-section">
+                    <h3>Properties</h3>
+                    <div class="properties-panel" id="propertiesPanel">
+                        <div class="no-selection">
+                            <p>Select a storage unit to edit properties</p>
+                            <p><small>Double-click cabinets to manage drawers</small></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Layout Analysis</h3>
+                    <div class="optimization-panel">
+                        <div class="optimization-status" id="optimizationStatus">
+                            <div class="status-item">
+                                <span class="status-label">Safety Access:</span>
+                                <span class="status status--success">Good</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Heavy Items:</span>
+                                <span class="status status--success">Good</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Workflow:</span>
+                                <span class="status status--success">Optimal</span>
+                            </div>
+                        </div>
+                        <div class="optimization-suggestions" id="optimizationSuggestions">
+                            <div class="suggestion">
+                                <strong>Tip:</strong> Keep frequently used tools at eye level (48-60 inches)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Organization Notes</h3>
+                    <textarea class="form-control" id="notesArea" placeholder="Add notes about your shed organization plan...&#10;&#10;Example:&#10;- Air compressor goes in corner&#10;- Heavy tools on bottom shelves&#10;- Paint/chemicals need ventilation"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span id="statusText">Ready - Drag storage units from left panel to organize your shed</span>
+            <span id="mouseCoords">Position: 0", 0"</span>
+        </div>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <!-- Modals -->
+    <div class="modal hidden" id="optimizeModal">
+        <div class="modal-content">
+            <h2>🎯 Layout Optimization</h2>
+            <div id="optimizationResults"></div>
+            <div class="modal-actions">
+                <button class="btn btn--primary" id="applyOptimization">Apply Suggestions</button>
+                <button class="btn btn--secondary" id="closeOptimizeModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="drawerModal">
+        <div class="modal-content">
+            <h2>🗂️ Cabinet Drawer Management</h2>
+            <div id="drawersList">
+                <!-- Dynamic drawer content -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn--primary" id="saveDrawers">Save Changes</button>
+                <button class="btn btn--secondary" id="closeDrawerModal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="customToolModal">
+        <div class="modal-content">
+            <h2>🔧 Add Miscellaneous Item</h2>
+            <div class="form-group">
+                <label class="form-label">Item Name</label>
+                <input type="text" class="form-control" id="customToolName" placeholder="e.g., Air Compressor, Miter Saw">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-control" id="customToolCategory">
+                    <option value="Large Equipment">Large Equipment</option>
+                    <option value="Power Tools">Power Tools</option>
+                    <option value="Hand Tools">Hand Tools</option>
+                    <option value="Paints & Chemicals">Paints & Chemicals</option>
+                    <option value="Safety Equipment">Safety Equipment</option>
+                    <option value="Miscellaneous">Miscellaneous</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Symbol/Icon</label>
+                <div class="symbol-picker" id="symbolPicker">
+                    <div class="symbol-option" data-symbol="💨">💨</div>
+                    <div class="symbol-option" data-symbol="🪚">🪚</div>
+                    <div class="symbol-option" data-symbol="🔧">🔧</div>
+                    <div class="symbol-option" data-symbol="🔨">🔨</div>
+                    <div class="symbol-option" data-symbol="⚙️">⚙️</div>
+                    <div class="symbol-option" data-symbol="🧰">🧰</div>
+                    <div class="symbol-option" data-symbol="🎨">🎨</div>
+                    <div class="symbol-option" data-symbol="🧯">🧯</div>
+                    <div class="symbol-option" data-symbol="🏗️">🏗️</div>
+                    <div class="symbol-option" data-symbol="📦">📦</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-control" id="customToolNotes" placeholder="Optional: size, location notes, etc.">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn--primary" id="addCustomTool">Add Item</button>
+                <button class="btn btn--secondary" id="closeCustomToolModal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
