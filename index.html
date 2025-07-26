@@ -2,231 +2,303 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shed Organization Planner - Construction Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Shed Layout Organizer - Professional Tool Management</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Professional shed layout organizer with 3D visualization and inventory management">
+    <meta name="theme-color" content="#1FB8CD">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231FB8CD'/><text y='50' font-size='50' text-anchor='middle' x='50' fill='white'>🏠</text></svg>">
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Shed Organizer">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2" as="font" type="font/woff2" crossorigin>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Top Toolbar -->
-        <div class="toolbar">
-            <div class="toolbar-left">
-                <h1>Shed Organization Planner</h1>
-                <span class="shed-info">10' × 14' Construction Shed</span>
+    <div id="app" class="app">
+        <!-- Header with Controls -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">🏠 Shed Organizer</h1>
+                <div class="header-controls">
+                    <button id="themeToggle" class="btn btn--sm btn--outline" title="Toggle Theme">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button id="viewToggle" class="btn btn--sm btn--primary" title="Toggle 3D View">
+                        <span class="view-icon">📐</span> 2D
+                    </button>
+                    <button id="menuToggle" class="btn btn--sm btn--outline" title="Menu">
+                        ☰
+                    </button>
+                </div>
             </div>
-            <div class="toolbar-right">
-                <button class="btn btn--secondary btn--sm" id="optimizeBtn">🎯 Optimize</button>
-                <button class="btn btn--primary btn--sm" id="saveBtn">💾 Save Layout</button>
-                <button class="btn btn--secondary btn--sm" id="loadBtn">📁 Load Layout</button>
-                <button class="btn btn--secondary btn--sm" id="exportPdfBtn">📄 Export PDF</button>
-                <button class="btn btn--secondary btn--sm" id="exportJsonBtn">💾 Export File</button>
-                <button class="btn btn--secondary btn--sm" id="undoBtn">↶ Undo</button>
-                <button class="btn btn--secondary btn--sm" id="redoBtn">↷ Redo</button>
-            </div>
-        </div>
+        </header>
 
         <!-- Main Content -->
-        <div class="main-content">
-            <!-- Left Sidebar - Tools & Storage -->
-            <div class="sidebar sidebar--left">
-                <div class="sidebar-section">
-                    <h3>Storage Units</h3>
-                    <div class="storage-palette">
-                        <div class="palette-item" data-type="cabinet" data-width="36" data-height="24" draggable="true">
-                            <div class="palette-preview cabinet-preview">
-                                <div class="drawer-indicators">
-                                    <div class="drawer-line"></div>
-                                    <div class="drawer-line"></div>
-                                    <div class="drawer-line"></div>
-                                </div>
-                            </div>
-                            <span>Cabinet 36"×24"<br><small>4 Drawers</small></span>
-                        </div>
-                        <div class="palette-item" data-type="shelf" data-width="42" data-height="36" draggable="true">
-                            <div class="palette-preview shelf-preview"></div>
-                            <span>Fixed Shelf 42"×36"<br><small>Multi-level</small></span>
-                        </div>
-                        <div class="palette-item" data-type="moveable_shelf" data-width="24" data-height="42" draggable="true">
-                            <div class="palette-preview moveable-preview">
-                                <div class="wheel-indicators">
-                                    <div class="wheel"></div>
-                                    <div class="wheel"></div>
-                                </div>
-                            </div>
-                            <span>Mobile Shelf 24"×42"<br><small>With wheels</small></span>
+        <main class="main-content">
+            <!-- Shed Layout Area -->
+            <section class="layout-section">
+                <div class="shed-container">
+                    <div id="shedGrid" class="shed-grid">
+                        <!-- Grid cells will be generated by JavaScript -->
+                    </div>
+                    <div id="placedItems" class="placed-items">
+                        <!-- Placed storage units will appear here -->
+                    </div>
+                    
+                    <!-- 3D View Container -->
+                    <div id="threeDView" class="three-d-view hidden">
+                        <canvas id="threeDCanvas" width="400" height="300"></canvas>
+                        <div class="three-d-controls">
+                            <button id="rotateLeft" class="btn btn--sm">↺</button>
+                            <button id="zoomIn" class="btn btn--sm">+</button>
+                            <button id="zoomOut" class="btn btn--sm">-</button>
+                            <button id="rotateRight" class="btn btn--sm">↻</button>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Layout Info -->
+                <div class="layout-info">
+                    <div class="layout-stats">
+                        <span class="stat">
+                            <strong>Dimensions:</strong> 14' × 10'
+                        </span>
+                        <span class="stat">
+                            <strong>Capacity:</strong> <span id="totalCapacity">0</span> tools
+                        </span>
+                        <span class="stat">
+                            <strong>Used:</strong> <span id="usedCapacity">0</span> tools
+                        </span>
+                    </div>
+                </div>
+            </section>
 
-                <div class="sidebar-section">
-                    <h3>Construction Tools</h3>
-                    <div class="tool-categories">
-                        <div class="category-tabs">
-                            <button class="tab-btn active" data-category="Hand Tools">Hand Tools</button>
-                            <button class="tab-btn" data-category="Power Tools">Power Tools</button>
-                            <button class="tab-btn" data-category="Plumbing">Plumbing</button>
-                            <button class="tab-btn" data-category="Electrical">Electrical</button>
-                            <button class="tab-btn" data-category="Fasteners">Hardware</button>
-                            <button class="tab-btn" data-category="Paints & Chemicals">Chemicals</button>
-                            <button class="tab-btn" data-category="Safety Equipment">Safety</button>
-                            <button class="tab-btn" data-category="Large Equipment">Large Items</button>
-                        </div>
-                        <div class="tool-list" id="toolList">
-                            <!-- Dynamic content -->
-                        </div>
-                        <button class="btn btn--primary btn--full-width" id="addCustomToolBtn">+ Add Miscellaneous Item</button>
+            <!-- Storage Units Palette -->
+            <section class="palette-section">
+                <h2 class="section-title">Storage Units</h2>
+                <div class="storage-palette">
+                    <div class="storage-unit" data-type="cabinet" data-width="3" data-height="2">
+                        <span class="unit-icon">🗄️</span>
+                        <span class="unit-name">Cabinet</span>
+                        <span class="unit-size">36"×24"</span>
+                        <div class="placement-hint">Double-tap to place</div>
+                    </div>
+                    <div class="storage-unit" data-type="fixed_shelf" data-width="3.5" data-height="3">
+                        <span class="unit-icon">📚</span>
+                        <span class="unit-name">Fixed Shelf</span>
+                        <span class="unit-size">42"×36"</span>
+                        <div class="placement-hint">Double-tap to place</div>
+                    </div>
+                    <div class="storage-unit" data-type="mobile_shelf" data-width="2" data-height="3.5">
+                        <span class="unit-icon">🛒</span>
+                        <span class="unit-name">Mobile Shelf</span>
+                        <span class="unit-size">24"×42"</span>
+                        <div class="placement-hint">Double-tap to place</div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Canvas Area -->
-            <div class="canvas-container">
-                <div class="canvas-controls">
-                    <button class="btn btn--sm" id="zoomIn">🔍+</button>
-                    <span id="zoomLevel">100%</span>
-                    <button class="btn btn--sm" id="zoomOut">🔍-</button>
-                    <button class="btn btn--sm" id="toggleGrid">📏 Grid</button>
-                    <button class="btn btn--sm" id="clearAllBtn">🗑️ Clear All</button>
-                    <div class="canvas-info">
-                        <span>Click units to select • Double-click cabinets for drawer view</span>
-                    </div>
-                </div>
-                <div class="canvas-wrapper">
-                    <div class="canvas" id="canvas">
-                        <div class="grid-overlay" id="gridOverlay"></div>
-                        <div class="shed-outline">
-                            <div class="shed-dimensions">
-                                <span class="dimension-label width">14 feet</span>
-                                <span class="dimension-label height">10 feet</span>
+            <!-- Tool Categories -->
+            <section class="tools-section">
+                <h2 class="section-title">Tool Categories</h2>
+                <div class="tool-categories">
+                    <div class="category" data-category="hand_tools">
+                        <div class="category-header">
+                            <span class="category-icon">🔨</span>
+                            <span class="category-name">Hand Tools</span>
+                            <button class="category-toggle">▼</button>
+                        </div>
+                        <div class="category-tools">
+                            <div class="tool-item" data-tool="hammer">
+                                <span class="tool-icon">🔨</span>
+                                <span class="tool-name">Hammer</span>
+                            </div>
+                            <div class="tool-item" data-tool="screwdriver">
+                                <span class="tool-icon">🪛</span>
+                                <span class="tool-name">Screwdriver Set</span>
+                            </div>
+                            <div class="tool-item" data-tool="wrench">
+                                <span class="tool-icon">🔧</span>
+                                <span class="tool-name">Wrench Set</span>
+                            </div>
+                            <div class="tool-item" data-tool="pliers">
+                                <span class="tool-icon">🪚</span>
+                                <span class="tool-name">Pliers</span>
+                            </div>
+                            <div class="tool-item" data-tool="measuring_tape">
+                                <span class="tool-icon">📏</span>
+                                <span class="tool-name">Measuring Tape</span>
+                            </div>
+                            <div class="tool-item" data-tool="level">
+                                <span class="tool-icon">📐</span>
+                                <span class="tool-name">Level</span>
+                            </div>
+                            <div class="tool-item" data-tool="hand_saw">
+                                <span class="tool-icon">🪚</span>
+                                <span class="tool-name">Hand Saw</span>
                             </div>
                         </div>
-                        <div class="storage-units" id="storageUnits">
-                            <!-- Dynamic storage units will be added here -->
-                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Right Sidebar - Properties & Info -->
-            <div class="sidebar sidebar--right">
-                <div class="sidebar-section">
-                    <h3>Properties</h3>
-                    <div class="properties-panel" id="propertiesPanel">
-                        <div class="no-selection">
-                            <p>Select a storage unit to edit properties</p>
-                            <p><small>Double-click cabinets to manage drawers</small></p>
+                    <div class="category" data-category="power_tools">
+                        <div class="category-header">
+                            <span class="category-icon">⚡</span>
+                            <span class="category-name">Power Tools</span>
+                            <button class="category-toggle">▶</button>
+                        </div>
+                        <div class="category-tools hidden">
+                            <div class="tool-item" data-tool="drill">
+                                <span class="tool-icon">🔩</span>
+                                <span class="tool-name">Drill</span>
+                            </div>
+                            <div class="tool-item" data-tool="circular_saw">
+                                <span class="tool-icon">⚙️</span>
+                                <span class="tool-name">Circular Saw</span>
+                            </div>
+                            <div class="tool-item" data-tool="jigsaw">
+                                <span class="tool-icon">🪚</span>
+                                <span class="tool-name">Jigsaw</span>
+                            </div>
+                            <div class="tool-item" data-tool="sander">
+                                <span class="tool-icon">🧽</span>
+                                <span class="tool-name">Sander</span>
+                            </div>
+                            <div class="tool-item" data-tool="router">
+                                <span class="tool-icon">⚡</span>
+                                <span class="tool-name">Router</span>
+                            </div>
+                            <div class="tool-item" data-tool="nail_gun">
+                                <span class="tool-icon">🔫</span>
+                                <span class="tool-name">Nail Gun</span>
+                            </div>
+                            <div class="tool-item" data-tool="grinder">
+                                <span class="tool-icon">⚙️</span>
+                                <span class="tool-name">Angle Grinder</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category" data-category="plumbing">
+                        <div class="category-header">
+                            <span class="category-icon">🔧</span>
+                            <span class="category-name">Plumbing</span>
+                            <button class="category-toggle">▶</button>
+                        </div>
+                        <div class="category-tools hidden">
+                            <div class="tool-item" data-tool="pipe_wrench">
+                                <span class="tool-icon">🔧</span>
+                                <span class="tool-name">Pipe Wrench</span>
+                            </div>
+                            <div class="tool-item" data-tool="pvc_pipes">
+                                <span class="tool-icon">🟢</span>
+                                <span class="tool-name">PVC Pipes</span>
+                            </div>
+                            <div class="tool-item" data-tool="torch">
+                                <span class="tool-icon">🔥</span>
+                                <span class="tool-name">Torch</span>
+                            </div>
+                            <div class="tool-item" data-tool="fixtures">
+                                <span class="tool-icon">🚿</span>
+                                <span class="tool-name">Fixtures</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category" data-category="electrical">
+                        <div class="category-header">
+                            <span class="category-icon">⚡</span>
+                            <span class="category-name">Electrical</span>
+                            <button class="category-toggle">▶</button>
+                        </div>
+                        <div class="category-tools hidden">
+                            <div class="tool-item" data-tool="wire">
+                                <span class="tool-icon">⚡</span>
+                                <span class="tool-name">Wire</span>
+                            </div>
+                            <div class="tool-item" data-tool="outlets">
+                                <span class="tool-icon">🔌</span>
+                                <span class="tool-name">Outlets</span>
+                            </div>
+                            <div class="tool-item" data-tool="multimeter">
+                                <span class="tool-icon">📏</span>
+                                <span class="tool-name">Multimeter</span>
+                            </div>
+                            <div class="tool-item" data-tool="bulbs">
+                                <span class="tool-icon">💡</span>
+                                <span class="tool-name">Light Bulbs</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
+        </main>
 
-                <div class="sidebar-section">
-                    <h3>Layout Analysis</h3>
-                    <div class="optimization-panel">
-                        <div class="optimization-status" id="optimizationStatus">
-                            <div class="status-item">
-                                <span class="status-label">Safety Access:</span>
-                                <span class="status status--success">Good</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Heavy Items:</span>
-                                <span class="status status--success">Good</span>
-                            </div>
-                            <div class="status-item">
-                                <span class="status-label">Workflow:</span>
-                                <span class="status status--success">Optimal</span>
-                            </div>
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <button id="undoBtn" class="btn btn--sm btn--outline" title="Undo">
+                ↶ Undo
+            </button>
+            <button id="redoBtn" class="btn btn--sm btn--outline" title="Redo">
+                ↷ Redo
+            </button>
+            <button id="saveBtn" class="btn btn--sm btn--primary" title="Save Layout">
+                💾 Save
+            </button>
+            <button id="loadBtn" class="btn btn--sm btn--outline" title="Load Layout">
+                📁 Load
+            </button>
+            <button id="exportBtn" class="btn btn--sm btn--secondary" title="Export">
+                📤 Export
+            </button>
+        </div>
+
+        <!-- Modal for Cabinet Organization -->
+        <div id="cabinetModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Organize Cabinet</h3>
+                    <button id="closeCabinetModal" class="btn btn--sm btn--outline">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="drawers-container">
+                        <div class="drawer" data-drawer="1">
+                            <h4>Drawer 1 (Top)</h4>
+                            <div class="drawer-tools"></div>
                         </div>
-                        <div class="optimization-suggestions" id="optimizationSuggestions">
-                            <div class="suggestion">
-                                <strong>Tip:</strong> Keep frequently used tools at eye level (48-60 inches)
-                            </div>
+                        <div class="drawer" data-drawer="2">
+                            <h4>Drawer 2</h4>
+                            <div class="drawer-tools"></div>
+                        </div>
+                        <div class="drawer" data-drawer="3">
+                            <h4>Drawer 3</h4>
+                            <div class="drawer-tools"></div>
+                        </div>
+                        <div class="drawer" data-drawer="4">
+                            <h4>Drawer 4 (Bottom)</h4>
+                            <div class="drawer-tools"></div>
                         </div>
                     </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>Organization Notes</h3>
-                    <textarea class="form-control" id="notesArea" placeholder="Add notes about your shed organization plan...&#10;&#10;Example:&#10;- Air compressor goes in corner&#10;- Heavy tools on bottom shelves&#10;- Paint/chemicals need ventilation"></textarea>
                 </div>
             </div>
         </div>
 
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <span id="statusText">Ready - Drag storage units from left panel to organize your shed</span>
-            <span id="mouseCoords">Position: 0", 0"</span>
+        <!-- Toast Messages -->
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
         </div>
-    </div>
 
-    <!-- Hidden File Input -->
-    <input type="file" id="fileInput" accept=".json" style="display: none;">
-
-    <!-- Modals -->
-    <div class="modal hidden" id="optimizeModal">
-        <div class="modal-content">
-            <h2>🎯 Layout Optimization</h2>
-            <div id="optimizationResults"></div>
-            <div class="modal-actions">
-                <button class="btn btn--primary" id="applyOptimization">Apply Suggestions</button>
-                <button class="btn btn--secondary" id="closeOptimizeModal">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal hidden" id="drawerModal">
-        <div class="modal-content">
-            <h2>🗂️ Cabinet Drawer Management</h2>
-            <div id="drawersList">
-                <!-- Dynamic drawer content -->
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn--primary" id="saveDrawers">Save Changes</button>
-                <button class="btn btn--secondary" id="closeDrawerModal">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal hidden" id="customToolModal">
-        <div class="modal-content">
-            <h2>🔧 Add Miscellaneous Item</h2>
-            <div class="form-group">
-                <label class="form-label">Item Name</label>
-                <input type="text" class="form-control" id="customToolName" placeholder="e.g., Air Compressor, Miter Saw">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Category</label>
-                <select class="form-control" id="customToolCategory">
-                    <option value="Large Equipment">Large Equipment</option>
-                    <option value="Power Tools">Power Tools</option>
-                    <option value="Hand Tools">Hand Tools</option>
-                    <option value="Paints & Chemicals">Paints & Chemicals</option>
-                    <option value="Safety Equipment">Safety Equipment</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Symbol/Icon</label>
-                <div class="symbol-picker" id="symbolPicker">
-                    <div class="symbol-option" data-symbol="💨">💨</div>
-                    <div class="symbol-option" data-symbol="🪚">🪚</div>
-                    <div class="symbol-option" data-symbol="🔧">🔧</div>
-                    <div class="symbol-option" data-symbol="🔨">🔨</div>
-                    <div class="symbol-option" data-symbol="⚙️">⚙️</div>
-                    <div class="symbol-option" data-symbol="🧰">🧰</div>
-                    <div class="symbol-option" data-symbol="🎨">🎨</div>
-                    <div class="symbol-option" data-symbol="🧯">🧯</div>
-                    <div class="symbol-option" data-symbol="🏗️">🏗️</div>
-                    <div class="symbol-option" data-symbol="📦">📦</div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Notes</label>
-                <input type="text" class="form-control" id="customToolNotes" placeholder="Optional: size, location notes, etc.">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn--primary" id="addCustomTool">Add Item</button>
-                <button class="btn btn--secondary" id="closeCustomToolModal">Cancel</button>
-            </div>
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <span>Processing...</span>
         </div>
     </div>
 

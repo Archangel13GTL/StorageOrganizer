@@ -1,1383 +1,1209 @@
-// Shed Organization Planner - Construction Tools
-// Application Configuration and State Management
+// Professional Shed Layout Organizer - Enhanced Mobile Touch Support
+// Optimized for Android Chrome and Pixel 8 Pro
 
-const APP_CONFIG = {
-    SHED_WIDTH: 1680, // 14 feet * 120 pixels per foot
-    SHED_HEIGHT: 1200, // 10 feet * 120 pixels per foot
-    GRID_SIZE: 120, // 12 inches per grid square (1 foot)
-    PIXEL_PER_INCH: 10, // 10 pixels per inch for precise positioning
-    MIN_WALKWAY: 360, // 36 inches minimum walkway for safety
-    STORAGE_UNITS: {
-        cabinet: { width: 360, height: 240, color: '#8B4513', type: 'cabinet', drawers: 4 },
-        shelf: { width: 420, height: 360, color: '#696969', type: 'shelf', levels: 3 },
-        moveable_shelf: { width: 240, height: 420, color: '#4682B4', type: 'moveable_shelf', mobile: true }
+class ShedOrganizer {
+    constructor() {
+        this.initializeProperties();
+        this.setupEventListeners();
+        this.initializeGrid();
+        this.initializeServiceWorker();
+        this.loadSavedData();
     }
-};
 
-// Construction Tool Categories - Focused on carpentry, plumbing, electrical
-const TOOL_CATEGORIES = {
-    "Hand Tools": {
-        color: "#FF6B6B",
-        items: [
-            { name: "Hammer", symbol: "🔨" },
-            { name: "Screwdriver Set", symbol: "🪛" },
-            { name: "Wrench Set", symbol: "🔧" },
-            { name: "Pliers", symbol: "🔧" },
-            { name: "Measuring Tape", symbol: "📏" },
-            { name: "Level", symbol: "📐" },
-            { name: "Utility Knife", symbol: "🔪" },
-            { name: "Chisel Set", symbol: "🔨" },
-            { name: "Hand Saw", symbol: "🪚" },
-            { name: "Square", symbol: "📐" }
-        ]
-    },
-    "Power Tools": {
-        color: "#4ECDC4",
-        items: [
-            { name: "Drill", symbol: "🪛" },
-            { name: "Circular Saw", symbol: "🪚" },
-            { name: "Jigsaw", symbol: "🪚" },
-            { name: "Sander", symbol: "⚙️" },
-            { name: "Router", symbol: "⚙️" },
-            { name: "Nail Gun", symbol: "🔫" },
-            { name: "Angle Grinder", symbol: "⚙️" },
-            { name: "Reciprocating Saw", symbol: "🪚" },
-            { name: "Impact Driver", symbol: "🪛" }
-        ]
-    },
-    "Plumbing": {
-        color: "#45B7D1",
-        items: [
-            { name: "Pipe Wrench", symbol: "🔧" },
-            { name: "PVC Pipes", symbol: "🟫" },
-            { name: "Pipe Fittings", symbol: "⚙️" },
-            { name: "Plumber's Putty", symbol: "🧴" },
-            { name: "Drain Snake", symbol: "🐍" },
-            { name: "Pipe Cutter", symbol: "✂️" },
-            { name: "Torch", symbol: "🔥" },
-            { name: "Copper Pipe", symbol: "🟫" },
-            { name: "Flux", symbol: "🧴" }
-        ]
-    },
-    "Electrical": {
-        color: "#F7DC6F",
-        items: [
-            { name: "Wire", symbol: "🔌" },
-            { name: "Outlets", symbol: "🔌" },
-            { name: "Wire Strippers", symbol: "✂️" },
-            { name: "Multimeter", symbol: "📊" },
-            { name: "Electrical Tape", symbol: "📼" },
-            { name: "Conduit", symbol: "🟫" },
-            { name: "Wire Nuts", symbol: "🔩" },
-            { name: "Breakers", symbol: "⚡" },
-            { name: "Switches", symbol: "🔌" }
-        ]
-    },
-    "Fasteners": {
-        color: "#BB8FCE",
-        items: [
-            { name: "Nails", symbol: "📎" },
-            { name: "Screws", symbol: "🔩" },
-            { name: "Bolts", symbol: "🔩" },
-            { name: "Washers", symbol: "⭕" },
-            { name: "Brackets", symbol: "📐" },
-            { name: "Hinges", symbol: "🚪" },
-            { name: "Anchors", symbol: "⚓" },
-            { name: "Nuts", symbol: "🔩" }
-        ]
-    },
-    "Paints & Chemicals": {
-        color: "#58D68D",
-        items: [
-            { name: "Spray Paint", symbol: "🎨" },
-            { name: "Wood Stain", symbol: "🟫" },
-            { name: "Motor Oil", symbol: "🛢️" },
-            { name: "WD-40", symbol: "🧴" },
-            { name: "Paint Brushes", symbol: "🖌️" },
-            { name: "Cleaning Supplies", symbol: "🧽" },
-            { name: "Primer", symbol: "🎨" },
-            { name: "Caulk", symbol: "🧴" },
-            { name: "Solvents", symbol: "🧴" }
-        ]
-    },
-    "Safety Equipment": {
-        color: "#F39C12",
-        items: [
-            { name: "Safety Glasses", symbol: "🥽" },
-            { name: "Work Gloves", symbol: "🧤" },
-            { name: "Dust Masks", symbol: "😷" },
-            { name: "Hard Hat", symbol: "⛑️" },
-            { name: "First Aid Kit", symbol: "🏥" },
-            { name: "Ear Protection", symbol: "🎧" },
-            { name: "Fire Extinguisher", symbol: "🧯" }
-        ]
-    },
-    "Large Equipment": {
-        color: "#85929E",
-        items: [
-            { name: "Air Compressor", symbol: "💨" },
-            { name: "Miter Saw", symbol: "🪚" },
-            { name: "Table Saw", symbol: "🪚" },
-            { name: "Shop Vacuum", symbol: "🌪️" },
-            { name: "Extension Cords", symbol: "🔌" },
-            { name: "Work Light", symbol: "💡" },
-            { name: "Ladder", symbol: "🪜" },
-            { name: "Sawhorses", symbol: "🪵" }
-        ]
-    }
-};
+    initializeProperties() {
+        // Core properties
+        this.shedWidth = 14;
+        this.shedHeight = 10;
+        this.placedItems = [];
+        this.selectedStorageUnit = null;
+        this.isPlacementMode = false;
+        this.isDragging = false;
+        this.draggedElement = null;
+        this.touchStartTime = 0;
+        this.longPressTimeout = null;
+        this.is3DView = false;
+        this.currentCabinetId = null;
 
-// Drawer color options for cabinet organization
-const DRAWER_COLORS = [
-    { name: "Red", value: "#FF6B6B" },
-    { name: "Blue", value: "#4ECDC4" },
-    { name: "Green", value: "#58D68D" },
-    { name: "Yellow", value: "#F7DC6F" },
-    { name: "Purple", value: "#BB8FCE" },
-    { name: "Orange", value: "#F39C12" },
-    { name: "Gray", value: "#85929E" },
-    { name: "Pink", value: "#FF69B4" }
-];
+        // Touch handling properties
+        this.lastTap = 0;
+        this.doubleTapDelay = 300;
+        this.longPressDelay = 200;
+        this.touchStartPos = { x: 0, y: 0 };
 
-// Application State
-let appState = {
-    storageUnits: [],
-    currentTool: null,
-    selectedUnit: null,
-    isGridVisible: true,
-    zoomLevel: 1,
-    dragState: null,
-    history: [],
-    historyIndex: -1,
-    customTools: [],
-    currentCategory: 'Hand Tools'
-};
+        // History for undo/redo
+        this.history = [];
+        this.historyIndex = -1;
+        this.maxHistorySize = 50;
 
-// DOM Elements Cache
-let elements = {};
-
-// Initialize Application
-document.addEventListener('DOMContentLoaded', function() {
-    initializeElements();
-    initializeCanvas();
-    initializeEventListeners();
-    loadToolCategory('Hand Tools');
-    updateOptimizationStatus();
-    saveState();
-    showMessage('Shed Organization Planner loaded successfully!', 'success');
-});
-
-function initializeElements() {
-    elements = {
-        canvas: document.getElementById('canvas'),
-        storageUnits: document.getElementById('storageUnits'),
-        gridOverlay: document.getElementById('gridOverlay'),
-        toolList: document.getElementById('toolList'),
-        propertiesPanel: document.getElementById('propertiesPanel'),
-        optimizationStatus: document.getElementById('optimizationStatus'),
-        optimizationSuggestions: document.getElementById('optimizationSuggestions'),
-        statusText: document.getElementById('statusText'),
-        mouseCoords: document.getElementById('mouseCoords'),
-        zoomLevel: document.getElementById('zoomLevel'),
-        notesArea: document.getElementById('notesArea'),
-        fileInput: document.getElementById('fileInput')
-    };
-}
-
-function initializeCanvas() {
-    // Set up canvas dimensions and styling
-    elements.canvas.style.width = APP_CONFIG.SHED_WIDTH + 'px';
-    elements.canvas.style.height = APP_CONFIG.SHED_HEIGHT + 'px';
-    
-    // Add mouse tracking for coordinates
-    elements.canvas.addEventListener('mousemove', function(e) {
-        const rect = elements.canvas.getBoundingClientRect();
-        const x = Math.round((e.clientX - rect.left) / APP_CONFIG.PIXEL_PER_INCH);
-        const y = Math.round((e.clientY - rect.top) / APP_CONFIG.PIXEL_PER_INCH);
-        elements.mouseCoords.textContent = `Position: ${x}", ${y}"`;
-    });
-    
-    // Make canvas droppable for storage units and tools
-    elements.canvas.addEventListener('dragover', handleCanvasDragOver);
-    elements.canvas.addEventListener('drop', handleCanvasDrop);
-}
-
-function initializeEventListeners() {
-    // Tool category tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            loadToolCategory(this.dataset.category);
-        });
-    });
-    
-    // Storage palette items - Fixed drag functionality
-    document.querySelectorAll('.palette-item').forEach(item => {
-        item.addEventListener('dragstart', handlePaletteDragStart);
-        item.setAttribute('draggable', 'true');
-    });
-    
-    // Toolbar buttons
-    document.getElementById('optimizeBtn').addEventListener('click', showOptimizationModal);
-    document.getElementById('saveBtn').addEventListener('click', saveLayout);
-    document.getElementById('loadBtn').addEventListener('click', () => elements.fileInput.click());
-    document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
-    document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
-    document.getElementById('undoBtn').addEventListener('click', undo);
-    document.getElementById('redoBtn').addEventListener('click', redo);
-    
-    // Canvas controls
-    document.getElementById('zoomIn').addEventListener('click', () => zoom(1.2));
-    document.getElementById('zoomOut').addEventListener('click', () => zoom(0.8));
-    document.getElementById('toggleGrid').addEventListener('click', toggleGrid);
-    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-    
-    // Custom tool button - Fixed functionality
-    document.getElementById('addCustomToolBtn').addEventListener('click', function() {
-        showModal('customToolModal');
-    });
-    
-    // File input
-    elements.fileInput.addEventListener('change', handleFileLoad);
-    
-    // Modal events
-    setupModalEvents();
-    
-    // Canvas click to deselect
-    elements.canvas.addEventListener('click', function(e) {
-        if (e.target === elements.canvas || e.target === elements.storageUnits) {
-            deselectAllUnits();
-        }
-    });
-    
-    // Keyboard shortcuts
-    document.addEventListener('keydown', handleKeyboardShortcuts);
-}
-
-function loadToolCategory(category) {
-    appState.currentCategory = category;
-    const categoryData = TOOL_CATEGORIES[category];
-    if (!categoryData) return;
-    
-    elements.toolList.innerHTML = '';
-    
-    // Add category tools
-    categoryData.items.forEach(tool => {
-        const toolElement = createToolElement(tool);
-        elements.toolList.appendChild(toolElement);
-    });
-    
-    // Add custom tools for this category
-    appState.customTools
-        .filter(tool => tool.category === category)
-        .forEach(tool => {
-            const toolElement = createToolElement(tool, true);
-            elements.toolList.appendChild(toolElement);
-        });
-}
-
-function createToolElement(tool, isCustom = false) {
-    const toolElement = document.createElement('div');
-    toolElement.className = 'tool-item';
-    toolElement.draggable = true;
-    toolElement.dataset.tool = JSON.stringify(tool);
-    toolElement.dataset.category = appState.currentCategory;
-    
-    toolElement.innerHTML = `
-        <span class="tool-symbol">${tool.symbol}</span>
-        <span class="tool-name">${tool.name}</span>
-        ${isCustom ? '<span class="custom-badge">Custom</span>' : ''}
-    `;
-    
-    // Fixed drag start handler
-    toolElement.addEventListener('dragstart', function(e) {
-        const toolData = JSON.parse(this.dataset.tool);
-        const data = {
-            type: 'tool',
-            tool: toolData,
-            category: this.dataset.category
+        // Storage unit configurations
+        this.storageConfig = {
+            cabinet: {
+                icon: '🗄️',
+                name: 'Cabinet',
+                capacity: 50,
+                drawers: 4
+            },
+            fixed_shelf: {
+                icon: '📚',
+                name: 'Fixed Shelf',
+                capacity: 75,
+                drawers: 0
+            },
+            mobile_shelf: {
+                icon: '🛒',
+                name: 'Mobile Shelf',
+                capacity: 40,
+                drawers: 0
+            }
         };
-        e.dataTransfer.setData('text/plain', JSON.stringify(data));
-        e.dataTransfer.effectAllowed = 'copy';
-        this.style.opacity = '0.5';
-        setTimeout(() => this.style.opacity = '1', 100);
-    });
-    
-    return toolElement;
-}
 
-function handlePaletteDragStart(e) {
-    const data = {
-        type: 'storage-unit',
-        unitType: this.dataset.type,
-        width: parseInt(this.dataset.width) * APP_CONFIG.PIXEL_PER_INCH,
-        height: parseInt(this.dataset.height) * APP_CONFIG.PIXEL_PER_INCH
-    };
-    e.dataTransfer.setData('text/plain', JSON.stringify(data));
-    e.dataTransfer.effectAllowed = 'copy';
-    this.style.opacity = '0.5';
-    setTimeout(() => this.style.opacity = '1', 100);
-}
-
-function handleCanvasDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-}
-
-function handleCanvasDrop(e) {
-    e.preventDefault();
-    
-    try {
-        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        const rect = elements.canvas.getBoundingClientRect();
-        
-        if (data.type === 'storage-unit') {
-            const x = Math.round((e.clientX - rect.left) / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-            const y = Math.round((e.clientY - rect.top) / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-            
-            const newUnit = createStorageUnit(data.unitType, x, y, data.width, data.height);
-            appState.storageUnits.push(newUnit);
-            elements.storageUnits.appendChild(newUnit.element);
-            selectStorageUnit(newUnit);
-            saveState();
-            updateStatusText(`Added ${data.unitType.replace('_', ' ')} to shed`);
-        } else if (data.type === 'tool') {
-            updateStatusText('Drag tools onto storage units to organize them');
-        }
-    } catch (error) {
-        console.error('Error handling drop:', error);
-        updateStatusText('Error processing drop operation');
-    }
-}
-
-function createStorageUnit(type, x, y, width = null, height = null) {
-    const config = APP_CONFIG.STORAGE_UNITS[type];
-    const unitWidth = width || config.width;
-    const unitHeight = height || config.height;
-    
-    const element = document.createElement('div');
-    element.className = `storage-unit storage-unit--${type}`;
-    element.style.left = x + 'px';
-    element.style.top = y + 'px';
-    element.style.width = unitWidth + 'px';
-    element.style.height = unitHeight + 'px';
-    
-    // Add unit label
-    const label = document.createElement('div');
-    label.className = 'unit-label';
-    label.textContent = type.replace('_', ' ').toUpperCase();
-    element.appendChild(label);
-    
-    // Add resize handles
-    const handles = ['nw', 'ne', 'sw', 'se'];
-    handles.forEach(handle => {
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = `resize-handle resize-handle--${handle}`;
-        element.appendChild(resizeHandle);
-    });
-    
-    // Add items container
-    const itemsContainer = document.createElement('div');
-    itemsContainer.className = 'items-container';
-    element.appendChild(itemsContainer);
-    
-    const unitData = {
-        id: 'unit_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        type: type,
-        x: x,
-        y: y,
-        width: unitWidth,
-        height: unitHeight,
-        element: element,
-        items: [],
-        name: type.replace('_', ' ').toUpperCase(),
-        drawers: type === 'cabinet' ? createDefaultDrawers() : null
-    };
-    
-    setupStorageUnitEvents(unitData);
-    
-    return unitData;
-}
-
-function createDefaultDrawers() {
-    return [
-        { id: 1, label: 'Drawer 1', color: '#FF6B6B', items: [] },
-        { id: 2, label: 'Drawer 2', color: '#4ECDC4', items: [] },
-        { id: 3, label: 'Drawer 3', color: '#58D68D', items: [] },
-        { id: 4, label: 'Drawer 4', color: '#F7DC6F', items: [] }
-    ];
-}
-
-function setupStorageUnitEvents(unitData) {
-    const element = unitData.element;
-    
-    // Click to select
-    element.addEventListener('click', function(e) {
-        e.stopPropagation();
-        selectStorageUnit(unitData);
-    });
-    
-    // Double-click for special actions - Fixed cabinet drawer modal
-    element.addEventListener('dblclick', function(e) {
-        e.stopPropagation();
-        if (unitData.type === 'cabinet') {
-            showDrawerModal(unitData);
-        } else {
-            renameUnit(unitData);
-        }
-    });
-    
-    // Drag functionality
-    let isDragging = false;
-    let dragStart = { x: 0, y: 0 };
-    
-    element.addEventListener('mousedown', function(e) {
-        if (e.target.classList.contains('resize-handle')) return;
-        
-        isDragging = true;
-        element.classList.add('dragging');
-        dragStart.x = e.clientX - unitData.x;
-        dragStart.y = e.clientY - unitData.y;
-        
-        document.addEventListener('mousemove', dragMove);
-        document.addEventListener('mouseup', dragEnd);
-        e.preventDefault();
-    });
-    
-    function dragMove(e) {
-        if (!isDragging) return;
-        
-        const canvasRect = elements.canvas.getBoundingClientRect();
-        let newX = e.clientX - canvasRect.left - dragStart.x;
-        let newY = e.clientY - canvasRect.top - dragStart.y;
-        
-        // Snap to grid
-        newX = Math.round(newX / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-        newY = Math.round(newY / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-        
-        // Constrain to canvas bounds
-        newX = Math.max(0, Math.min(newX, APP_CONFIG.SHED_WIDTH - unitData.width));
-        newY = Math.max(0, Math.min(newY, APP_CONFIG.SHED_HEIGHT - unitData.height));
-        
-        unitData.x = newX;
-        unitData.y = newY;
-        element.style.left = newX + 'px';
-        element.style.top = newY + 'px';
-        
-        updateStatusText(`Moving ${unitData.name} to ${Math.round(newX/APP_CONFIG.PIXEL_PER_INCH)}", ${Math.round(newY/APP_CONFIG.PIXEL_PER_INCH)}"`);
-    }
-    
-    function dragEnd() {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        element.classList.remove('dragging');
-        document.removeEventListener('mousemove', dragMove);
-        document.removeEventListener('mouseup', dragEnd);
-        
-        updateOptimizationStatus();
-        saveState();
-        updateStatusText('Ready');
-    }
-    
-    // Enable dropping tools on storage units - Fixed functionality
-    element.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.dataTransfer.dropEffect = 'copy';
-        element.classList.add('dragging-over');
-    });
-    
-    element.addEventListener('dragleave', function(e) {
-        element.classList.remove('dragging-over');
-    });
-    
-    element.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        element.classList.remove('dragging-over');
-        
-        try {
-            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-            if (data.type === 'tool') {
-                addToolToStorageUnit(unitData, data.tool);
+        // Tool data with correct icons
+        this.toolData = {
+            hand_tools: {
+                name: "Hand Tools",
+                icon: "🔨",
+                color: "#FF6B6B",
+                tools: [
+                    { name: "Hammer", icon: "🔨", size: "medium" },
+                    { name: "Screwdriver Set", icon: "🪛", size: "small" },
+                    { name: "Wrench Set", icon: "🔧", size: "medium" },
+                    { name: "Pliers", icon: "🔧", size: "small" },
+                    { name: "Measuring Tape", icon: "📏", size: "small" },
+                    { name: "Level", icon: "📐", size: "large" },
+                    { name: "Hand Saw", icon: "🪚", size: "large" }
+                ]
+            },
+            power_tools: {
+                name: "Power Tools",
+                icon: "⚡",
+                color: "#4ECDC4",
+                tools: [
+                    { name: "Drill", icon: "🔩", size: "medium", heavy: true },
+                    { name: "Circular Saw", icon: "⚙️", size: "large", heavy: true },
+                    { name: "Jigsaw", icon: "🪚", size: "medium", heavy: true },
+                    { name: "Sander", icon: "🧽", size: "medium", heavy: true },
+                    { name: "Router", icon: "⚡", size: "medium", heavy: true },
+                    { name: "Nail Gun", icon: "🔫", size: "medium", heavy: true },
+                    { name: "Angle Grinder", icon: "⚙️", size: "medium", heavy: true }
+                ]
+            },
+            plumbing: {
+                name: "Plumbing",
+                icon: "🔧",
+                color: "#45B7D1",
+                tools: [
+                    { name: "Pipe Wrench", icon: "🔧", size: "large" },
+                    { name: "PVC Pipes", icon: "🟢", size: "large" },
+                    { name: "Torch", icon: "🔥", size: "medium" },
+                    { name: "Fixtures", icon: "🚿", size: "medium" }
+                ]
+            },
+            electrical: {
+                name: "Electrical",
+                icon: "⚡",
+                color: "#F7DC6F",
+                tools: [
+                    { name: "Wire", icon: "⚡", size: "medium" },
+                    { name: "Outlets", icon: "🔌", size: "small" },
+                    { name: "Multimeter", icon: "📏", size: "small" },
+                    { name: "Light Bulbs", icon: "💡", size: "small" }
+                ]
             }
-        } catch (error) {
-            console.error('Error handling tool drop:', error);
-        }
-    });
-    
-    setupResizeHandles(unitData);
-}
+        };
+    }
 
-function setupResizeHandles(unitData) {
-    const handles = unitData.element.querySelectorAll('.resize-handle');
-    
-    handles.forEach(handle => {
-        handle.addEventListener('mousedown', function(e) {
-            e.stopPropagation();
-            
-            const handleType = handle.className.split('--')[1];
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const startWidth = unitData.width;
-            const startHeight = unitData.height;
-            const startLeft = unitData.x;
-            const startTop = unitData.y;
-            
-            function resizeMove(e) {
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                
-                let newWidth = startWidth;
-                let newHeight = startHeight;
-                let newX = startLeft;
-                let newY = startTop;
-                
-                switch(handleType) {
-                    case 'se':
-                        newWidth = Math.max(120, startWidth + deltaX);
-                        newHeight = Math.max(120, startHeight + deltaY);
-                        break;
-                    case 'sw':
-                        newWidth = Math.max(120, startWidth - deltaX);
-                        newHeight = Math.max(120, startHeight + deltaY);
-                        newX = startLeft + (startWidth - newWidth);
-                        break;
-                    case 'ne':
-                        newWidth = Math.max(120, startWidth + deltaX);
-                        newHeight = Math.max(120, startHeight - deltaY);
-                        newY = startTop + (startHeight - newHeight);
-                        break;
-                    case 'nw':
-                        newWidth = Math.max(120, startWidth - deltaX);
-                        newHeight = Math.max(120, startHeight - deltaY);
-                        newX = startLeft + (startWidth - newWidth);
-                        newY = startTop + (startHeight - newHeight);
-                        break;
-                }
-                
-                // Snap to grid
-                newWidth = Math.round(newWidth / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-                newHeight = Math.round(newHeight / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-                newX = Math.round(newX / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-                newY = Math.round(newY / APP_CONFIG.GRID_SIZE) * APP_CONFIG.GRID_SIZE;
-                
-                unitData.width = newWidth;
-                unitData.height = newHeight;
-                unitData.x = newX;
-                unitData.y = newY;
-                
-                unitData.element.style.width = newWidth + 'px';
-                unitData.element.style.height = newHeight + 'px';
-                unitData.element.style.left = newX + 'px';
-                unitData.element.style.top = newY + 'px';
-                
-                updateStatusText(`Resizing ${unitData.name}: ${Math.round(newWidth/APP_CONFIG.PIXEL_PER_INCH)}" × ${Math.round(newHeight/APP_CONFIG.PIXEL_PER_INCH)}"`);
-            }
-            
-            function resizeEnd() {
-                document.removeEventListener('mousemove', resizeMove);
-                document.removeEventListener('mouseup', resizeEnd);
-                updatePropertiesPanel();
-                saveState();
-                updateStatusText('Ready');
-            }
-            
-            document.addEventListener('mousemove', resizeMove);
-            document.addEventListener('mouseup', resizeEnd);
+    setupEventListeners() {
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+        
+        // View toggle
+        document.getElementById('viewToggle').addEventListener('click', () => this.toggleView());
+        
+        // Menu toggle
+        document.getElementById('menuToggle').addEventListener('click', () => this.toggleMenu());
+
+        // Action bar buttons
+        document.getElementById('undoBtn').addEventListener('click', () => this.undo());
+        document.getElementById('redoBtn').addEventListener('click', () => this.redo());
+        document.getElementById('saveBtn').addEventListener('click', () => this.saveLayout());
+        document.getElementById('loadBtn').addEventListener('click', () => this.loadLayout());
+        document.getElementById('exportBtn').addEventListener('click', () => this.exportLayout());
+
+        // Storage unit touch events with proper Android handling
+        document.querySelectorAll('.storage-unit').forEach(unit => {
+            this.setupStorageUnitEvents(unit);
         });
-    });
-}
 
-function addToolToStorageUnit(unit, tool) {
-    const item = {
-        id: 'item_' + Date.now(),
-        name: tool.name,
-        symbol: tool.symbol,
-        category: appState.currentCategory,
-        x: Math.random() * (unit.width - 40),
-        y: Math.random() * (unit.height - 40)
-    };
-    
-    unit.items.push(item);
-    renderStorageUnitItems(unit);
-    updatePropertiesPanel();
-    saveState();
-    updateStatusText(`Added ${tool.name} to ${unit.name}`);
-}
+        // Tool item events
+        document.querySelectorAll('.tool-item').forEach(tool => {
+            this.setupToolEvents(tool);
+        });
 
-function renderStorageUnitItems(unit) {
-    const container = unit.element.querySelector('.items-container');
-    container.innerHTML = '';
-    
-    unit.items.forEach(item => {
-        const itemElement = document.createElement('div');
-        itemElement.className = 'storage-item';
-        itemElement.style.left = item.x + 'px';
-        itemElement.style.top = item.y + 'px';
-        itemElement.innerHTML = `
-            <span class="item-symbol">${item.symbol}</span>
-            <span class="item-name">${item.name}</span>
-        `;
-        
-        // Make items draggable within the storage unit
-        itemElement.addEventListener('mousedown', function(e) {
-            e.stopPropagation();
-            let isDragging = true;
-            const startX = e.clientX - item.x;
-            const startY = e.clientY - item.y;
+        // Category toggles - Fixed implementation
+        document.querySelectorAll('.category-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleCategory(header.closest('.category'));
+            });
             
-            function moveItem(e) {
-                if (!isDragging) return;
-                
-                const rect = unit.element.getBoundingClientRect();
-                let newX = e.clientX - rect.left - startX;
-                let newY = e.clientY - rect.top - startY;
-                
-                // Constrain within storage unit
-                newX = Math.max(0, Math.min(newX, unit.width - 40));
-                newY = Math.max(0, Math.min(newY, unit.height - 40));
-                
-                item.x = newX;
-                item.y = newY;
-                itemElement.style.left = newX + 'px';
-                itemElement.style.top = newY + 'px';
+            // Also handle touch events for mobile
+            header.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleCategory(header.closest('.category'));
+            });
+        });
+
+        // Grid events
+        this.setupGridEvents();
+
+        // Modal events
+        this.setupModalEvents();
+
+        // 3D controls
+        this.setup3DControls();
+
+        // Prevent default touch behaviors that interfere with our custom handling
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.shed-grid, .storage-unit, .tool-item')) {
+                e.preventDefault();
             }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (this.isDragging) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Voice commands setup
+        this.setupVoiceCommands();
+    }
+
+    setupStorageUnitEvents(unit) {
+        let tapCount = 0;
+        let tapTimeout = null;
+
+        // Enhanced touch handling for Android
+        unit.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             
-            function stopDragging() {
+            this.addTouchFeedback(e.touches[0]);
+            this.touchStartTime = Date.now();
+            this.touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            
+            // Handle double-tap detection
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimeout = setTimeout(() => {
+                    tapCount = 0;
+                }, this.doubleTapDelay);
+            } else if (tapCount === 2) {
+                clearTimeout(tapTimeout);
+                tapCount = 0;
+                this.handleStorageUnitDoubleTap(unit);
+            }
+
+            // Haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }, { passive: false });
+
+        unit.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchDuration = Date.now() - this.touchStartTime;
+            
+            if (touchDuration < 100) {
+                // Quick tap - visual feedback only
+                unit.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    unit.style.transform = '';
+                }, 100);
+            }
+        }, { passive: false });
+
+        // Fallback click event for non-touch devices
+        unit.addEventListener('click', (e) => {
+            if (!('ontouchstart' in window)) {
+                this.handleStorageUnitDoubleTap(unit);
+            }
+        });
+    }
+
+    setupToolEvents(tool) {
+        let isDragging = false;
+        let startPos = { x: 0, y: 0 };
+
+        tool.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.addTouchFeedback(e.touches[0]);
+            
+            startPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            this.touchStartTime = Date.now();
+            
+            // Long press for drag
+            this.longPressTimeout = setTimeout(() => {
+                isDragging = true;
+                tool.classList.add('dragging');
+                this.isDragging = true;
+                this.draggedElement = tool;
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            }, this.longPressDelay);
+
+        }, { passive: false });
+
+        tool.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const moveDistance = Math.abs(touch.clientX - startPos.x) + Math.abs(touch.clientY - startPos.y);
+                
+                if (moveDistance > 10) {
+                    clearTimeout(this.longPressTimeout);
+                    this.createDragGhost(tool, touch);
+                }
+            }
+        }, { passive: false });
+
+        tool.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            clearTimeout(this.longPressTimeout);
+            
+            if (isDragging) {
+                this.handleToolDrop(e.changedTouches[0]);
+                tool.classList.remove('dragging');
+                this.removeDragGhost();
                 isDragging = false;
-                document.removeEventListener('mousemove', moveItem);
-                document.removeEventListener('mouseup', stopDragging);
-                saveState();
+                this.isDragging = false;
+                this.draggedElement = null;
             }
-            
-            document.addEventListener('mousemove', moveItem);
-            document.addEventListener('mouseup', stopDragging);
+        }, { passive: false });
+    }
+
+    setupGridEvents() {
+        const grid = document.getElementById('shedGrid');
+        
+        grid.addEventListener('touchstart', (e) => {
+            if (this.isPlacementMode && this.selectedStorageUnit) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const cell = this.getCellFromTouch(touch);
+                if (cell) {
+                    this.placementPreview(cell);
+                }
+            }
+        }, { passive: false });
+
+        grid.addEventListener('touchend', (e) => {
+            if (this.isPlacementMode && this.selectedStorageUnit) {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                const cell = this.getCellFromTouch(touch);
+                if (cell) {
+                    this.placeStorageUnit(cell);
+                }
+            }
+        }, { passive: false });
+
+        // Fallback for non-touch devices
+        grid.addEventListener('click', (e) => {
+            if (!('ontouchstart' in window) && this.isPlacementMode && this.selectedStorageUnit) {
+                const cell = e.target.closest('.grid-cell');
+                if (cell) {
+                    this.placeStorageUnit(cell);
+                }
+            }
+        });
+    }
+
+    initializeGrid() {
+        const grid = document.getElementById('shedGrid');
+        grid.innerHTML = '';
+
+        for (let row = 0; row < this.shedHeight; row++) {
+            for (let col = 0; col < this.shedWidth; col++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.dataset.row = row;
+                cell.dataset.col = col;
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    handleStorageUnitDoubleTap(unit) {
+        // Clear any previous selection
+        document.querySelectorAll('.storage-unit').forEach(u => {
+            u.classList.remove('selected', 'placement-mode');
         });
         
-        container.appendChild(itemElement);
-    });
-}
+        // Select the current unit with enhanced visual feedback
+        unit.classList.add('selected', 'placement-mode');
+        this.selectedStorageUnit = {
+            type: unit.dataset.type,
+            width: parseFloat(unit.dataset.width),
+            height: parseFloat(unit.dataset.height),
+            element: unit
+        };
+        
+        this.isPlacementMode = true;
+        this.showToast('✨ Placement mode activated! Tap grid to place unit');
+        
+        // Visual feedback on grid
+        document.querySelectorAll('.grid-cell').forEach(cell => {
+            cell.classList.add('highlight');
+        });
 
-function selectStorageUnit(unit) {
-    deselectAllUnits();
-    unit.element.classList.add('selected');
-    appState.selectedUnit = unit;
-    updatePropertiesPanel();
-    updateStatusText(`Selected: ${unit.name}`);
-}
-
-function deselectAllUnits() {
-    appState.storageUnits.forEach(unit => {
-        unit.element.classList.remove('selected');
-    });
-    appState.selectedUnit = null;
-    updatePropertiesPanel();
-}
-
-function updatePropertiesPanel() {
-    if (!appState.selectedUnit) {
-        elements.propertiesPanel.innerHTML = `
-            <div class="no-selection">
-                <p>Select a storage unit to edit properties</p>
-                <p><small>Double-click cabinets to manage drawers</small></p>
-            </div>
-        `;
-        return;
-    }
-    
-    const unit = appState.selectedUnit;
-    const widthInches = Math.round(unit.width / APP_CONFIG.PIXEL_PER_INCH);
-    const heightInches = Math.round(unit.height / APP_CONFIG.PIXEL_PER_INCH);
-    const xInches = Math.round(unit.x / APP_CONFIG.PIXEL_PER_INCH);
-    const yInches = Math.round(unit.y / APP_CONFIG.PIXEL_PER_INCH);
-    
-    elements.propertiesPanel.innerHTML = `
-        <div class="property-group">
-            <label class="property-label">Unit Name</label>
-            <input type="text" class="property-input" id="unitName" value="${unit.name}">
-        </div>
-        <div class="property-group">
-            <label class="property-label">Position (inches)</label>
-            <div class="flex gap-8">
-                <input type="number" class="property-input" id="unitX" value="${xInches}" placeholder="X">
-                <input type="number" class="property-input" id="unitY" value="${yInches}" placeholder="Y">
-            </div>
-        </div>
-        <div class="property-group">
-            <label class="property-label">Size (inches)</label>
-            <div class="flex gap-8">
-                <input type="number" class="property-input" id="unitWidth" value="${widthInches}" placeholder="Width">
-                <input type="number" class="property-input" id="unitHeight" value="${heightInches}" placeholder="Height">
-            </div>
-        </div>
-        <div class="property-group">
-            <label class="property-label">Type</label>
-            <select class="property-input" id="unitType">
-                <option value="cabinet" ${unit.type === 'cabinet' ? 'selected' : ''}>Cabinet with Drawers</option>
-                <option value="shelf" ${unit.type === 'shelf' ? 'selected' : ''}>Fixed Shelf</option>
-                <option value="moveable_shelf" ${unit.type === 'moveable_shelf' ? 'selected' : ''}>Mobile Shelf</option>
-            </select>
-        </div>
-        ${unit.type === 'cabinet' ? `
-        <div class="property-group">
-            <button class="btn btn--primary btn--full-width" onclick="showDrawerModalForUnit('${unit.id}')">
-                🗂️ Manage Drawers (${unit.drawers ? unit.drawers.length : 4})
-            </button>
-        </div>
-        ` : ''}
-        <div class="property-group">
-            <label class="property-label">Items (${unit.items.length})</label>
-            <div class="items-list">
-                ${unit.items.map(item => `
-                    <div class="item-entry">
-                        <span>${item.symbol} ${item.name}</span>
-                        <button class="btn btn--sm" onclick="removeItemFromUnit('${unit.id}', '${item.id}')">Remove</button>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        <div class="property-group">
-            <button class="btn btn--secondary btn--full-width" onclick="deleteStorageUnit('${unit.id}')">
-                🗑️ Delete Unit
-            </button>
-        </div>
-    `;
-    
-    // Add event listeners
-    document.getElementById('unitName').addEventListener('change', updateUnitProperties);
-    document.getElementById('unitX').addEventListener('change', updateUnitProperties);
-    document.getElementById('unitY').addEventListener('change', updateUnitProperties);
-    document.getElementById('unitWidth').addEventListener('change', updateUnitProperties);
-    document.getElementById('unitHeight').addEventListener('change', updateUnitProperties);
-    document.getElementById('unitType').addEventListener('change', updateUnitProperties);
-}
-
-function updateUnitProperties() {
-    if (!appState.selectedUnit) return;
-    
-    const unit = appState.selectedUnit;
-    const nameInput = document.getElementById('unitName');
-    const xInput = document.getElementById('unitX');
-    const yInput = document.getElementById('unitY');
-    const widthInput = document.getElementById('unitWidth');
-    const heightInput = document.getElementById('unitHeight');
-    const typeInput = document.getElementById('unitType');
-    
-    if (nameInput && nameInput.value !== unit.name) {
-        unit.name = nameInput.value;
-        unit.element.querySelector('.unit-label').textContent = unit.name;
-    }
-    
-    if (xInput && yInput) {
-        const newX = parseInt(xInput.value) * APP_CONFIG.PIXEL_PER_INCH;
-        const newY = parseInt(yInput.value) * APP_CONFIG.PIXEL_PER_INCH;
-        if (newX !== unit.x || newY !== unit.y) {
-            unit.x = newX;
-            unit.y = newY;
-            unit.element.style.left = unit.x + 'px';
-            unit.element.style.top = unit.y + 'px';
-        }
-    }
-    
-    if (widthInput && heightInput) {
-        const newWidth = parseInt(widthInput.value) * APP_CONFIG.PIXEL_PER_INCH;
-        const newHeight = parseInt(heightInput.value) * APP_CONFIG.PIXEL_PER_INCH;
-        if (newWidth !== unit.width || newHeight !== unit.height) {
-            unit.width = newWidth;
-            unit.height = newHeight;
-            unit.element.style.width = unit.width + 'px';
-            unit.element.style.height = unit.height + 'px';
-        }
-    }
-    
-    if (typeInput && typeInput.value !== unit.type) {
-        unit.type = typeInput.value;
-        unit.element.className = `storage-unit storage-unit--${unit.type} selected`;
-        if (unit.type === 'cabinet' && !unit.drawers) {
-            unit.drawers = createDefaultDrawers();
-        }
-    }
-    
-    saveState();
-}
-
-function showDrawerModal(unit) {
-    if (!unit.drawers) {
-        unit.drawers = createDefaultDrawers();
-    }
-    
-    const modal = document.getElementById('drawerModal');
-    const drawersList = document.getElementById('drawersList');
-    
-    drawersList.innerHTML = `
-        <div class="drawer-list">
-            ${unit.drawers.map(drawer => `
-                <div class="drawer-item" data-drawer-id="${drawer.id}">
-                    <div class="drawer-header">
-                        <div class="drawer-color-picker" style="background-color: ${drawer.color}" onclick="toggleColorOptions(${drawer.id})"></div>
-                        <input type="text" class="drawer-label-input" value="${drawer.label}" 
-                               onchange="updateDrawerLabel(${drawer.id}, this.value)">
-                        <span class="drawer-item-count">${drawer.items ? drawer.items.length : 0} items</span>
-                    </div>
-                    <div class="color-options hidden" id="colors-${drawer.id}">
-                        ${DRAWER_COLORS.map(color => `
-                            <div class="color-option" style="background-color: ${color.value}" 
-                                 onclick="updateDrawerColor(${drawer.id}, '${color.value}')" 
-                                 title="${color.name}"></div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-    
-    showModal('drawerModal');
-}
-
-function updateOptimizationStatus() {
-    // Analyze current layout for safety and efficiency
-    const suggestions = [];
-    let safetyScore = 'Good';
-    let heavyItemsScore = 'Good';
-    let workflowScore = 'Optimal';
-    
-    // Check for adequate pathways
-    const hasAdequatePathways = checkPathways();
-    if (!hasAdequatePathways) {
-        safetyScore = 'Issues';
-        suggestions.push('Ensure 36" minimum walkways for safe movement');
-    }
-    
-    // Check heavy item placement
-    const heavyItemsLow = checkHeavyItemPlacement();
-    if (!heavyItemsLow) {
-        heavyItemsScore = 'Review';
-        suggestions.push('Place heavy items (air compressor, large tools) on lower shelves');
-    }
-    
-    // Check tool grouping
-    const goodGrouping = checkToolGrouping();
-    if (!goodGrouping) {
-        workflowScore = 'Review';
-        suggestions.push('Group related tools together (e.g., all electrical tools in one area)');
-    }
-    
-    // Add general suggestions
-    if (suggestions.length === 0) {
-        suggestions.push('Keep frequently used tools at eye level (48-60 inches)');
-        suggestions.push('Store chemicals and paints in well-ventilated areas');
-        suggestions.push('Keep safety equipment easily accessible near the entrance');
-    }
-    
-    // Update status display
-    const statusItems = elements.optimizationStatus.querySelectorAll('.status-item .status');
-    if (statusItems.length >= 3) {
-        statusItems[0].textContent = safetyScore;
-        statusItems[0].className = `status status--${safetyScore === 'Good' ? 'success' : 'error'}`;
-        statusItems[1].textContent = heavyItemsScore;
-        statusItems[1].className = `status status--${heavyItemsScore === 'Good' ? 'success' : 'warning'}`;
-        statusItems[2].textContent = workflowScore;
-        statusItems[2].className = `status status--${workflowScore === 'Optimal' ? 'success' : 'warning'}`;
-    }
-    
-    elements.optimizationSuggestions.innerHTML = suggestions
-        .map(suggestion => `<div class="suggestion"><strong>Tip:</strong> ${suggestion}</div>`)
-        .join('');
-}
-
-function checkPathways() {
-    // Simplified check - ensure units aren't blocking major pathways
-    return appState.storageUnits.length === 0 || appState.storageUnits.every(unit => 
-        unit.x > 0 && unit.y > 0 && 
-        unit.x + unit.width < APP_CONFIG.SHED_WIDTH && 
-        unit.y + unit.height < APP_CONFIG.SHED_HEIGHT
-    );
-}
-
-function checkHeavyItemPlacement() {
-    // Check if heavy items are placed on lower areas
-    const heavyItems = ['Air Compressor', 'Table Saw', 'Miter Saw'];
-    return appState.storageUnits.every(unit => {
-        return unit.items.every(item => {
-            if (heavyItems.includes(item.name)) {
-                return unit.y + item.y > APP_CONFIG.SHED_HEIGHT * 0.6; // Lower 40% of shed
+        // Auto-exit placement mode after 10 seconds
+        setTimeout(() => {
+            if (this.isPlacementMode) {
+                this.exitPlacementMode();
             }
-            return true;
+        }, 10000);
+    }
+
+    getCellFromTouch(touch) {
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        return element?.closest('.grid-cell');
+    }
+
+    placementPreview(cell) {
+        // Clear previous previews
+        document.querySelectorAll('.grid-cell').forEach(c => {
+            c.classList.remove('highlight', 'invalid');
         });
-    });
-}
 
-function checkToolGrouping() {
-    // Basic check for tool organization
-    return true; // Simplified for now
-}
+        if (!this.selectedStorageUnit) return;
 
-function showOptimizationModal() {
-    const modal = document.getElementById('optimizeModal');
-    const results = document.getElementById('optimizationResults');
-    
-    results.innerHTML = `
-        <div class="optimization-result">
-            <h3>🎯 Layout Analysis & Suggestions</h3>
-            <ul>
-                <li><strong>Heavy Equipment:</strong> Place air compressor, large saws on floor or bottom shelves</li>
-                <li><strong>Frequently Used Tools:</strong> Keep daily tools at eye level (48-60 inches)</li>
-                <li><strong>Safety Access:</strong> Maintain 36" walkways, keep fire extinguisher accessible</li>
-                <li><strong>Chemical Storage:</strong> Store paints/chemicals away from heat sources</li>
-                <li><strong>Tool Organization:</strong> Group by trade - electrical, plumbing, carpentry</li>
-                <li><strong>Cabinet Drawers:</strong> Use color coding for different tool categories</li>
-            </ul>
-        </div>
-    `;
-    
-    showModal('optimizeModal');
-}
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const width = Math.ceil(this.selectedStorageUnit.width);
+        const height = Math.ceil(this.selectedStorageUnit.height);
 
-function setupModalEvents() {
-    // Close buttons
-    document.getElementById('closeOptimizeModal').addEventListener('click', () => hideModal('optimizeModal'));
-    document.getElementById('closeDrawerModal').addEventListener('click', () => hideModal('drawerModal'));
-    document.getElementById('closeCustomToolModal').addEventListener('click', () => hideModal('customToolModal'));
-    
-    // Apply optimization
-    document.getElementById('applyOptimization').addEventListener('click', function() {
-        hideModal('optimizeModal');
-        updateStatusText('Optimization suggestions noted');
-    });
-    
-    // Save drawers
-    document.getElementById('saveDrawers').addEventListener('click', function() {
-        hideModal('drawerModal');
-        updatePropertiesPanel();
-        saveState();
-        updateStatusText('Drawer configuration saved');
-    });
-    
-    // Add custom tool
-    document.getElementById('addCustomTool').addEventListener('click', addCustomTool);
-    
-    // Symbol picker
-    document.querySelectorAll('.symbol-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-        });
-    });
-    
-    // Close on background click
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.add('hidden');
-            }
-        });
-    });
-}
+        let canPlace = true;
 
-function addCustomTool() {
-    const name = document.getElementById('customToolName').value.trim();
-    const category = document.getElementById('customToolCategory').value;
-    const notes = document.getElementById('customToolNotes').value.trim();
-    const selectedSymbol = document.querySelector('.symbol-option.selected');
-    
-    if (!name || !selectedSymbol) {
-        showMessage('Please enter a name and select a symbol', 'error');
-        return;
-    }
-    
-    const customTool = {
-        name: name,
-        symbol: selectedSymbol.dataset.symbol,
-        category: category,
-        notes: notes,
-        isCustom: true
-    };
-    
-    appState.customTools.push(customTool);
-    
-    // Clear form
-    document.getElementById('customToolName').value = '';
-    document.getElementById('customToolNotes').value = '';
-    document.querySelector('.symbol-option.selected')?.classList.remove('selected');
-    
-    hideModal('customToolModal');
-    
-    // Refresh tool list if current category matches
-    if (appState.currentCategory === category) {
-        loadToolCategory(category);
-    }
-    
-    showMessage(`Added ${name} to ${category}`, 'success');
-    saveState();
-}
-
-// File operations
-function saveLayout() {
-    const layout = {
-        version: '1.0',
-        timestamp: new Date().toISOString(),
-        shed: {
-            width: APP_CONFIG.SHED_WIDTH,
-            height: APP_CONFIG.SHED_HEIGHT
-        },
-        storageUnits: appState.storageUnits.map(unit => ({
-            id: unit.id,
-            type: unit.type,
-            x: unit.x,
-            y: unit.y,
-            width: unit.width,
-            height: unit.height,
-            name: unit.name,
-            items: unit.items,
-            drawers: unit.drawers
-        })),
-        customTools: appState.customTools,
-        notes: elements.notesArea.value
-    };
-    
-    localStorage.setItem('shedLayout', JSON.stringify(layout));
-    showMessage('Layout saved to browser storage', 'success');
-}
-
-function exportToJSON() {
-    const layout = {
-        version: '1.0',
-        timestamp: new Date().toISOString(),
-        shed: {
-            width: APP_CONFIG.SHED_WIDTH,
-            height: APP_CONFIG.SHED_HEIGHT
-        },
-        storageUnits: appState.storageUnits.map(unit => ({
-            id: unit.id,
-            type: unit.type,
-            x: unit.x,
-            y: unit.y,
-            width: unit.width,
-            height: unit.height,
-            name: unit.name,
-            items: unit.items,
-            drawers: unit.drawers
-        })),
-        customTools: appState.customTools,
-        notes: elements.notesArea.value
-    };
-    
-    const dataStr = JSON.stringify(layout, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `shed-layout-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    URL.revokeObjectURL(url);
-    showMessage('Layout exported as JSON file', 'success');
-}
-
-function exportToPDF() {
-    // Simple PDF export using browser print
-    const originalTitle = document.title;
-    document.title = 'Shed Organization Layout';
-    
-    // Hide non-essential elements for printing
-    document.body.classList.add('print-mode');
-    
-    window.print();
-    
-    // Restore after printing
-    setTimeout(() => {
-        document.title = originalTitle;
-        document.body.classList.remove('print-mode');
-    }, 1000);
-    
-    showMessage('Print dialog opened for PDF export', 'success');
-}
-
-function handleFileLoad(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const layout = JSON.parse(e.target.result);
-            loadLayoutData(layout);
-            showMessage('Layout loaded successfully', 'success');
-        } catch (error) {
-            showMessage('Error loading layout file: ' + error.message, 'error');
-        }
-    };
-    reader.readAsText(file);
-    
-    // Reset file input
-    event.target.value = '';
-}
-
-function loadLayoutData(layout) {
-    // Clear existing units
-    appState.storageUnits.forEach(unit => unit.element.remove());
-    appState.storageUnits = [];
-    
-    // Load storage units
-    if (layout.storageUnits) {
-        layout.storageUnits.forEach(unitData => {
-            const unit = createStorageUnit(unitData.type, unitData.x, unitData.y, unitData.width, unitData.height);
-            unit.id = unitData.id;
-            unit.name = unitData.name;
-            unit.items = unitData.items || [];
-            unit.drawers = unitData.drawers || (unitData.type === 'cabinet' ? createDefaultDrawers() : null);
-            
-            unit.element.querySelector('.unit-label').textContent = unit.name;
-            renderStorageUnitItems(unit);
-            
-            appState.storageUnits.push(unit);
-            elements.storageUnits.appendChild(unit.element);
-        });
-    }
-    
-    // Load custom tools
-    if (layout.customTools) {
-        appState.customTools = layout.customTools;
-    }
-    
-    // Load notes
-    if (layout.notes) {
-        elements.notesArea.value = layout.notes;
-    }
-    
-    updateOptimizationStatus();
-    updatePropertiesPanel();
-}
-
-// Utility functions
-function showModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
-}
-
-function hideModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
-
-function showMessage(text, type = 'success') {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `${type}-message`;
-    messageDiv.textContent = text;
-    document.body.appendChild(messageDiv);
-    
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 3000);
-}
-
-function updateStatusText(text) {
-    elements.statusText.textContent = text;
-}
-
-function zoom(factor) {
-    appState.zoomLevel *= factor;
-    appState.zoomLevel = Math.max(0.5, Math.min(appState.zoomLevel, 2));
-    elements.canvas.style.transform = `scale(${appState.zoomLevel})`;
-    elements.zoomLevel.textContent = Math.round(appState.zoomLevel * 100) + '%';
-}
-
-function toggleGrid() {
-    appState.isGridVisible = !appState.isGridVisible;
-    elements.gridOverlay.style.display = appState.isGridVisible ? 'block' : 'none';
-    document.getElementById('toggleGrid').textContent = appState.isGridVisible ? '📏 Grid' : '📏 Grid (Off)';
-}
-
-function clearAll() {
-    if (confirm('Are you sure you want to clear all storage units? This cannot be undone.')) {
-        appState.storageUnits.forEach(unit => unit.element.remove());
-        appState.storageUnits = [];
-        appState.selectedUnit = null;
-        updatePropertiesPanel();
-        updateOptimizationStatus();
-        saveState();
-        showMessage('All storage units cleared', 'success');
-    }
-}
-
-function renameUnit(unit) {
-    const newName = prompt('Enter new name for this unit:', unit.name);
-    if (newName && newName.trim() && newName.trim() !== unit.name) {
-        unit.name = newName.trim();
-        unit.element.querySelector('.unit-label').textContent = unit.name;
-        updatePropertiesPanel();
-        saveState();
-    }
-}
-
-function saveState() {
-    const state = {
-        storageUnits: appState.storageUnits.map(unit => ({
-            id: unit.id,
-            type: unit.type,
-            x: unit.x,
-            y: unit.y,
-            width: unit.width,
-            height: unit.height,
-            name: unit.name,
-            items: unit.items,
-            drawers: unit.drawers
-        })),
-        customTools: appState.customTools,
-        notes: elements.notesArea.value
-    };
-    
-    appState.history = appState.history.slice(0, appState.historyIndex + 1);
-    appState.history.push(JSON.stringify(state));
-    appState.historyIndex++;
-    
-    // Limit history size
-    if (appState.history.length > 50) {
-        appState.history.shift();
-        appState.historyIndex--;
-    }
-}
-
-function undo() {
-    if (appState.historyIndex > 0) {
-        appState.historyIndex--;
-        const state = JSON.parse(appState.history[appState.historyIndex]);
-        loadLayoutData(state);
-        showMessage('Undo successful', 'success');
-    }
-}
-
-function redo() {
-    if (appState.historyIndex < appState.history.length - 1) {
-        appState.historyIndex++;
-        const state = JSON.parse(appState.history[appState.historyIndex]);
-        loadLayoutData(state);
-        showMessage('Redo successful', 'success');
-    }
-}
-
-function handleKeyboardShortcuts(e) {
-    if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-            case 's':
-                e.preventDefault();
-                saveLayout();
-                break;
-            case 'o':
-                e.preventDefault();
-                elements.fileInput.click();
-                break;
-            case 'z':
-                e.preventDefault();
-                if (e.shiftKey) {
-                    redo();
-                } else {
-                    undo();
+        // Check if placement is valid
+        for (let r = row; r < row + height; r++) {
+            for (let c = col; c < col + width; c++) {
+                const targetCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (!targetCell || this.isCellOccupied(r, c)) {
+                    canPlace = false;
                 }
-                break;
-            case 'p':
-                e.preventDefault();
-                exportToPDF();
-                break;
+            }
+        }
+
+        // Highlight cells
+        for (let r = row; r < row + height; r++) {
+            for (let c = col; c < col + width; c++) {
+                const targetCell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (targetCell) {
+                    targetCell.classList.add(canPlace ? 'highlight' : 'invalid');
+                }
+            }
         }
     }
-    
-    // Delete selected unit
-    if (e.key === 'Delete' && appState.selectedUnit) {
-        deleteStorageUnit(appState.selectedUnit.id);
+
+    placeStorageUnit(cell) {
+        if (!this.selectedStorageUnit) return;
+
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        const width = Math.ceil(this.selectedStorageUnit.width);
+        const height = Math.ceil(this.selectedStorageUnit.height);
+
+        // Validate placement
+        if (!this.canPlaceUnit(row, col, width, height)) {
+            this.showToast('❌ Cannot place here - check for obstacles');
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            return;
+        }
+
+        const unitId = Date.now().toString();
+        const unitType = this.selectedStorageUnit.type;
+
+        // Create placed unit with proper configuration
+        const placedUnit = this.createPlacedUnitElement({
+            id: unitId,
+            type: unitType,
+            row: row,
+            col: col,
+            width: width,
+            height: height,
+            tools: unitType === 'cabinet' ? { 1: [], 2: [], 3: [], 4: [] } : []
+        });
+
+        // Add to DOM
+        document.getElementById('placedItems').appendChild(placedUnit);
+
+        // Add to placed items array
+        this.placedItems.push({
+            id: unitId,
+            type: unitType,
+            row: row,
+            col: col,
+            width: width,
+            height: height,
+            tools: unitType === 'cabinet' ? { 1: [], 2: [], 3: [], 4: [] } : []
+        });
+
+        // Save state for undo
+        this.saveState();
+
+        // Success feedback
+        this.showToast('✅ Storage unit placed successfully!');
+        if (navigator.vibrate) {
+            navigator.vibrate([50, 30, 50]);
+        }
+
+        // Exit placement mode
+        this.exitPlacementMode();
+        this.updateCapacityDisplay();
+        this.autoSave();
     }
-    
-    // Escape to deselect
-    if (e.key === 'Escape') {
-        deselectAllUnits();
+
+    setupPlacedUnitEvents(unit) {
+        // Double-tap to open cabinet organization
+        let tapCount = 0;
+        let tapTimeout = null;
+
+        unit.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimeout = setTimeout(() => {
+                    tapCount = 0;
+                }, this.doubleTapDelay);
+            } else if (tapCount === 2) {
+                clearTimeout(tapTimeout);
+                tapCount = 0;
+                
+                if (unit.dataset.type === 'cabinet') {
+                    this.openCabinetModal(unit.dataset.id);
+                }
+            }
+        }, { passive: false });
+
+        // Long press to delete
+        let longPressTimeout;
+        unit.addEventListener('touchstart', (e) => {
+            longPressTimeout = setTimeout(() => {
+                if (confirm('Delete this storage unit?')) {
+                    this.removeStorageUnit(unit);
+                }
+            }, 1000);
+        });
+
+        unit.addEventListener('touchend', () => {
+            clearTimeout(longPressTimeout);
+        });
+
+        unit.addEventListener('touchmove', () => {
+            clearTimeout(longPressTimeout);
+        });
+
+        // Fallback for non-touch devices
+        unit.addEventListener('dblclick', () => {
+            if (unit.dataset.type === 'cabinet') {
+                this.openCabinetModal(unit.dataset.id);
+            }
+        });
+    }
+
+    canPlaceUnit(row, col, width, height) {
+        // Check boundaries
+        if (row + height > this.shedHeight || col + width > this.shedWidth) {
+            return false;
+        }
+
+        // Check for occupied cells
+        for (let r = row; r < row + height; r++) {
+            for (let c = col; c < col + width; c++) {
+                if (this.isCellOccupied(r, c)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    isCellOccupied(row, col) {
+        return this.placedItems.some(item => {
+            return row >= item.row && row < item.row + item.height &&
+                   col >= item.col && col < item.col + item.width;
+        });
+    }
+
+    exitPlacementMode() {
+        this.isPlacementMode = false;
+        this.selectedStorageUnit = null;
+        
+        document.querySelectorAll('.storage-unit').forEach(u => {
+            u.classList.remove('selected', 'placement-mode');
+        });
+        document.querySelectorAll('.grid-cell').forEach(c => {
+            c.classList.remove('highlight', 'invalid');
+        });
+    }
+
+    // Fixed category toggle functionality
+    toggleCategory(category) {
+        const tools = category.querySelector('.category-tools');
+        const toggle = category.querySelector('.category-toggle');
+        
+        if (tools.classList.contains('hidden')) {
+            tools.classList.remove('hidden');
+            toggle.textContent = '▼';
+        } else {
+            tools.classList.add('hidden');
+            toggle.textContent = '▶';
+        }
+    }
+
+    createDragGhost(tool, touch) {
+        // Remove existing ghost
+        this.removeDragGhost();
+
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        
+        const icon = tool.querySelector('.tool-icon').textContent;
+        const name = tool.querySelector('.tool-name').textContent;
+        ghost.innerHTML = `${icon} ${name}`;
+
+        document.body.appendChild(ghost);
+        this.dragGhost = ghost;
+
+        this.updateDragGhost(touch);
+    }
+
+    updateDragGhost(touch) {
+        if (this.dragGhost) {
+            this.dragGhost.style.left = touch.clientX + 'px';
+            this.dragGhost.style.top = touch.clientY + 'px';
+        }
+    }
+
+    removeDragGhost() {
+        if (this.dragGhost) {
+            document.body.removeChild(this.dragGhost);
+            this.dragGhost = null;
+        }
+    }
+
+    handleToolDrop(touch) {
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const dropTarget = element?.closest('.placed-unit, .drawer-tools');
+        
+        if (dropTarget && this.draggedElement) {
+            const toolData = {
+                name: this.draggedElement.querySelector('.tool-name').textContent,
+                icon: this.draggedElement.querySelector('.tool-icon').textContent,
+                category: this.draggedElement.closest('.category').dataset.category
+            };
+
+            if (dropTarget.classList.contains('placed-unit')) {
+                this.addToolToStorage(dropTarget.dataset.id, toolData);
+            } else if (dropTarget.classList.contains('drawer-tools')) {
+                this.addToolToDrawer(dropTarget.closest('.drawer').dataset.drawer, toolData);
+            }
+
+            this.showToast(`✅ ${toolData.name} added successfully!`);
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+    }
+
+    addToolToStorage(storageId, toolData) {
+        const storage = this.placedItems.find(item => item.id === storageId);
+        if (storage) {
+            if (storage.type === 'cabinet') {
+                // Add to first available drawer
+                for (let drawer = 1; drawer <= 4; drawer++) {
+                    if (storage.tools[drawer].length < 12) {
+                        storage.tools[drawer].push(toolData);
+                        break;
+                    }
+                }
+            } else {
+                storage.tools.push(toolData);
+            }
+            this.saveState();
+            this.updateCapacityDisplay();
+            this.autoSave();
+        }
+    }
+
+    addToolToDrawer(drawerNumber, toolData) {
+        if (this.currentCabinetId) {
+            const cabinet = this.placedItems.find(item => item.id === this.currentCabinetId);
+            if (cabinet && cabinet.tools[drawerNumber].length < 12) {
+                cabinet.tools[drawerNumber].push(toolData);
+                this.renderDrawerTools();
+                this.saveState();
+                this.updateCapacityDisplay();
+                this.autoSave();
+            }
+        }
+    }
+
+    // Fixed cabinet modal functionality
+    openCabinetModal(cabinetId) {
+        this.currentCabinetId = cabinetId;
+        const modal = document.getElementById('cabinetModal');
+        modal.classList.remove('hidden');
+        this.renderDrawerTools();
+        this.showToast('🗂️ Cabinet organization opened');
+    }
+
+    renderDrawerTools() {
+        const cabinet = this.placedItems.find(item => item.id === this.currentCabinetId);
+        if (!cabinet) return;
+
+        for (let drawer = 1; drawer <= 4; drawer++) {
+            const drawerTools = document.querySelector(`[data-drawer="${drawer}"] .drawer-tools`);
+            drawerTools.innerHTML = '';
+
+            cabinet.tools[drawer].forEach((tool, index) => {
+                const toolElement = document.createElement('div');
+                toolElement.className = 'drawer-tool';
+                toolElement.innerHTML = `
+                    <span>${tool.icon}</span>
+                    <span>${tool.name}</span>
+                    <button onclick="shedOrganizer.removeToolFromDrawer(${drawer}, ${index})">×</button>
+                `;
+                drawerTools.appendChild(toolElement);
+            });
+        }
+    }
+
+    removeToolFromDrawer(drawerNumber, toolIndex) {
+        const cabinet = this.placedItems.find(item => item.id === this.currentCabinetId);
+        if (cabinet) {
+            cabinet.tools[drawerNumber].splice(toolIndex, 1);
+            this.renderDrawerTools();
+            this.saveState();
+            this.updateCapacityDisplay();
+            this.autoSave();
+            this.showToast('Tool removed from drawer');
+        }
+    }
+
+    setupModalEvents() {
+        document.getElementById('closeCabinetModal').addEventListener('click', () => {
+            document.getElementById('cabinetModal').classList.add('hidden');
+            this.currentCabinetId = null;
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('cabinetModal').addEventListener('click', (e) => {
+            if (e.target.id === 'cabinetModal') {
+                document.getElementById('cabinetModal').classList.add('hidden');
+                this.currentCabinetId = null;
+            }
+        });
+    }
+
+    toggleView() {
+        this.is3DView = !this.is3DView;
+        const viewToggle = document.getElementById('viewToggle');
+        const threeDView = document.getElementById('threeDView');
+        
+        if (this.is3DView) {
+            threeDView.classList.remove('hidden');
+            viewToggle.innerHTML = '<span class="view-icon">📐</span> 3D';
+            this.render3DView();
+            this.showToast('🎯 Switched to 3D view');
+        } else {
+            threeDView.classList.add('hidden');
+            viewToggle.innerHTML = '<span class="view-icon">📐</span> 2D';
+            this.showToast('📋 Switched to 2D view');
+        }
+    }
+
+    render3DView() {
+        const canvas = document.getElementById('threeDCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio || canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio || canvas.offsetHeight;
+        canvas.style.width = canvas.offsetWidth + 'px';
+        canvas.style.height = canvas.offsetHeight + 'px';
+        ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw isometric grid
+        this.drawIsometricGrid(ctx, canvas.offsetWidth, canvas.offsetHeight);
+        
+        // Draw placed items in 3D
+        this.placedItems.forEach(item => {
+            this.drawIsometricUnit(ctx, item, canvas.offsetWidth, canvas.offsetHeight);
+        });
+    }
+
+    drawIsometricGrid(ctx, width, height) {
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const cellSize = 20;
+        
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-border');
+        ctx.lineWidth = 1;
+        
+        // Draw isometric grid lines
+        for (let i = -this.shedWidth; i <= this.shedWidth; i++) {
+            ctx.beginPath();
+            ctx.moveTo(centerX + i * cellSize, centerY - this.shedHeight * cellSize * 0.5);
+            ctx.lineTo(centerX + i * cellSize, centerY + this.shedHeight * cellSize * 0.5);
+            ctx.stroke();
+        }
+        
+        for (let j = -this.shedHeight; j <= this.shedHeight; j++) {
+            ctx.beginPath();
+            ctx.moveTo(centerX - this.shedWidth * cellSize, centerY + j * cellSize * 0.5);
+            ctx.lineTo(centerX + this.shedWidth * cellSize, centerY + j * cellSize * 0.5);
+            ctx.stroke();
+        }
+    }
+
+    drawIsometricUnit(ctx, item, width, height) {
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const cellSize = 20;
+        const unitHeight = 30;
+        
+        const x = centerX + (item.col - this.shedWidth/2) * cellSize;
+        const y = centerY + (item.row - this.shedHeight/2) * cellSize * 0.5;
+        
+        // Draw 3D box
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-primary');
+        ctx.fillRect(x, y - unitHeight, item.width * cellSize, unitHeight);
+        
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-primary-hover');
+        ctx.fillRect(x, y, item.width * cellSize, item.height * cellSize * 0.5);
+        
+        // Add label
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-text');
+        ctx.font = '12px var(--font-family-base)';
+        ctx.textAlign = 'center';
+        ctx.fillText(item.type.replace('_', ' '), x + item.width * cellSize / 2, y + 15);
+    }
+
+    setup3DControls() {
+        document.getElementById('rotateLeft').addEventListener('click', () => {
+            this.showToast('↺ Rotating left...');
+            setTimeout(() => this.render3DView(), 100);
+        });
+        
+        document.getElementById('rotateRight').addEventListener('click', () => {
+            this.showToast('↻ Rotating right...');
+            setTimeout(() => this.render3DView(), 100);
+        });
+        
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            this.showToast('🔍 Zooming in...');
+            setTimeout(() => this.render3DView(), 100);
+        });
+        
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            this.showToast('🔍 Zooming out...');
+            setTimeout(() => this.render3DView(), 100);
+        });
+    }
+
+    // Fixed theme toggle functionality
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-color-scheme') || 
+                            (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        document.documentElement.setAttribute('data-color-scheme', newTheme);
+        
+        const themeIcon = document.querySelector('.theme-icon');
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        
+        localStorage.setItem('theme', newTheme);
+        this.showToast(`🎨 Switched to ${newTheme} mode`);
+        
+        // Re-render 3D view if active to use new colors
+        if (this.is3DView) {
+            setTimeout(() => this.render3DView(), 100);
+        }
+    }
+
+    saveState() {
+        const state = {
+            placedItems: [...this.placedItems],
+            timestamp: Date.now()
+        };
+        
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        this.history.push(state);
+        
+        if (this.history.length > this.maxHistorySize) {
+            this.history.shift();
+        } else {
+            this.historyIndex++;
+        }
+        
+        this.updateUndoRedoButtons();
+    }
+
+    undo() {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            this.restoreState(this.history[this.historyIndex]);
+            this.showToast('↶ Undone');
+        }
+    }
+
+    redo() {
+        if (this.historyIndex < this.history.length - 1) {
+            this.historyIndex++;
+            this.restoreState(this.history[this.historyIndex]);
+            this.showToast('↷ Redone');
+        }
+    }
+
+    restoreState(state) {
+        this.placedItems = [...state.placedItems];
+        this.renderPlacedItems();
+        this.updateCapacityDisplay();
+        this.updateUndoRedoButtons();
+    }
+
+    renderPlacedItems() {
+        const container = document.getElementById('placedItems');
+        container.innerHTML = '';
+        
+        this.placedItems.forEach(item => {
+            const element = this.createPlacedUnitElement(item);
+            container.appendChild(element);
+        });
+    }
+
+    createPlacedUnitElement(item) {
+        const placedUnit = document.createElement('div');
+        placedUnit.className = 'placed-unit';
+        placedUnit.dataset.type = item.type;
+        placedUnit.dataset.row = item.row;
+        placedUnit.dataset.col = item.col;
+        placedUnit.dataset.width = item.width;
+        placedUnit.dataset.height = item.height;
+        placedUnit.dataset.id = item.id;
+
+        const cellWidth = 100 / this.shedWidth;
+        const cellHeight = 100 / this.shedHeight;
+        
+        placedUnit.style.left = `${item.col * cellWidth}%`;
+        placedUnit.style.top = `${item.row * cellHeight}%`;
+        placedUnit.style.width = `${item.width * cellWidth}%`;
+        placedUnit.style.height = `${item.height * cellHeight}%`;
+
+        // Use consistent storage configuration
+        const config = this.storageConfig[item.type];
+        if (!config) {
+            console.error('Unknown storage type:', item.type);
+            return placedUnit;
+        }
+
+        const icon = document.createElement('span');
+        icon.className = 'unit-icon';
+        icon.textContent = config.icon;
+        
+        const name = document.createElement('span');
+        name.className = 'unit-name';
+        name.textContent = config.name;
+
+        placedUnit.appendChild(icon);
+        placedUnit.appendChild(name);
+
+        this.setupPlacedUnitEvents(placedUnit);
+        return placedUnit;
+    }
+
+    updateUndoRedoButtons() {
+        document.getElementById('undoBtn').disabled = this.historyIndex <= 0;
+        document.getElementById('redoBtn').disabled = this.historyIndex >= this.history.length - 1;
+    }
+
+    updateCapacityDisplay() {
+        let totalCapacity = 0;
+        let usedCapacity = 0;
+        
+        this.placedItems.forEach(item => {
+            const config = this.storageConfig[item.type];
+            if (config) {
+                totalCapacity += config.capacity;
+                
+                if (item.type === 'cabinet') {
+                    Object.values(item.tools).forEach(drawer => {
+                        usedCapacity += drawer.length;
+                    });
+                } else {
+                    usedCapacity += item.tools.length;
+                }
+            }
+        });
+        
+        document.getElementById('totalCapacity').textContent = totalCapacity;
+        document.getElementById('usedCapacity').textContent = usedCapacity;
+    }
+
+    saveLayout() {
+        const layout = {
+            placedItems: this.placedItems,
+            timestamp: Date.now(),
+            version: '1.0'
+        };
+        
+        localStorage.setItem('shedLayout', JSON.stringify(layout));
+        this.showToast('💾 Layout saved successfully!');
+    }
+
+    loadLayout() {
+        const saved = localStorage.getItem('shedLayout');
+        if (saved) {
+            try {
+                const layout = JSON.parse(saved);
+                this.placedItems = layout.placedItems || [];
+                this.renderPlacedItems();
+                this.updateCapacityDisplay();
+                this.saveState();
+                this.showToast('📁 Layout loaded successfully!');
+            } catch (error) {
+                this.showToast('❌ Error loading layout');
+                console.error('Load error:', error);
+            }
+        } else {
+            this.showToast('📁 No saved layout found');
+        }
+    }
+
+    autoSave() {
+        const layout = {
+            placedItems: this.placedItems,
+            timestamp: Date.now(),
+            version: '1.0'
+        };
+        
+        localStorage.setItem('shedLayoutAutoSave', JSON.stringify(layout));
+    }
+
+    loadSavedData() {
+        // Load theme preference
+        const savedTheme = localStorage.getItem('theme') || 
+                          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-color-scheme', savedTheme);
+        document.querySelector('.theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        
+        // Load auto-saved layout
+        const autoSaved = localStorage.getItem('shedLayoutAutoSave');
+        if (autoSaved) {
+            try {
+                const layout = JSON.parse(autoSaved);
+                this.placedItems = layout.placedItems || [];
+                this.renderPlacedItems();
+                this.updateCapacityDisplay();
+            } catch (error) {
+                console.error('Auto-load error:', error);
+            }
+        }
+        
+        // Initialize state
+        this.saveState();
+    }
+
+    exportLayout() {
+        this.showLoadingIndicator();
+        
+        setTimeout(() => {
+            const exportData = {
+                layout: this.placedItems,
+                metadata: {
+                    exportDate: new Date().toISOString(),
+                    totalItems: this.placedItems.length,
+                    totalCapacity: document.getElementById('totalCapacity').textContent,
+                    usedCapacity: document.getElementById('usedCapacity').textContent
+                }
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `shed-layout-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            this.hideLoadingIndicator();
+            this.showToast('📤 Layout exported successfully!');
+        }, 1000);
+    }
+
+    removeStorageUnit(unit) {
+        const id = unit.dataset.id;
+        this.placedItems = this.placedItems.filter(item => item.id !== id);
+        unit.remove();
+        this.saveState();
+        this.updateCapacityDisplay();
+        this.autoSave();
+        this.showToast('🗑️ Storage unit removed');
+    }
+
+    addTouchFeedback(touch) {
+        const feedback = document.createElement('div');
+        feedback.className = 'touch-feedback';
+        feedback.style.left = touch.clientX - 20 + 'px';
+        feedback.style.top = touch.clientY - 20 + 'px';
+        feedback.style.width = '40px';
+        feedback.style.height = '40px';
+        
+        document.body.appendChild(feedback);
+        
+        setTimeout(() => {
+            if (feedback.parentNode) {
+                feedback.parentNode.removeChild(feedback);
+            }
+        }, 300);
+    }
+
+    showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+        
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+    }
+
+    showLoadingIndicator() {
+        document.getElementById('loadingIndicator').classList.remove('hidden');
+    }
+
+    hideLoadingIndicator() {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+    }
+
+    setupVoiceCommands() {
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            this.recognition = new SpeechRecognition();
+            this.recognition.continuous = false;
+            this.recognition.interimResults = false;
+            this.recognition.lang = 'en-US';
+
+            this.recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript.toLowerCase();
+                this.processVoiceCommand(command);
+            };
+
+            this.recognition.onerror = (event) => {
+                console.warn('Speech recognition error:', event.error);
+            };
+        }
+    }
+
+    processVoiceCommand(command) {
+        if (command.includes('save layout')) {
+            this.saveLayout();
+        } else if (command.includes('load layout')) {
+            this.loadLayout();
+        } else if (command.includes('toggle 3d') || command.includes('three d')) {
+            this.toggleView();
+        } else if (command.includes('undo')) {
+            this.undo();
+        } else if (command.includes('redo')) {
+            this.redo();
+        } else if (command.includes('export')) {
+            this.exportLayout();
+        } else {
+            this.showToast('🎤 Voice command not recognized');
+        }
+    }
+
+    toggleMenu() {
+        // Start voice recognition if available
+        if (this.recognition) {
+            this.recognition.start();
+            this.showToast('🎤 Listening for voice commands...');
+        } else {
+            this.showToast('🎤 Voice commands not supported');
+        }
+    }
+
+    initializeServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('SW registered:', registration);
+                })
+                .catch(error => {
+                    console.log('SW registration failed:', error);
+                });
+        }
     }
 }
 
-// Global functions for onclick handlers
-window.removeItemFromUnit = function(unitId, itemId) {
-    const unit = appState.storageUnits.find(u => u.id === unitId);
-    if (unit) {
-        unit.items = unit.items.filter(item => item.id !== itemId);
-        renderStorageUnitItems(unit);
-        updatePropertiesPanel();
-        saveState();
-        showMessage('Item removed', 'success');
-    }
-};
+// Initialize the application
+let shedOrganizer;
 
-window.deleteStorageUnit = function(unitId) {
-    if (confirm('Are you sure you want to delete this storage unit and all its contents?')) {
-        const unitIndex = appState.storageUnits.findIndex(unit => unit.id === unitId);
-        if (unitIndex !== -1) {
-            const unit = appState.storageUnits[unitIndex];
-            unit.element.remove();
-            appState.storageUnits.splice(unitIndex, 1);
-            appState.selectedUnit = null;
-            updatePropertiesPanel();
-            updateOptimizationStatus();
-            saveState();
-            showMessage('Storage unit deleted', 'success');
-        }
-    }
-};
-
-window.showDrawerModalForUnit = function(unitId) {
-    const unit = appState.storageUnits.find(u => u.id === unitId);
-    if (unit) {
-        showDrawerModal(unit);
-    }
-};
-
-window.updateDrawerLabel = function(drawerId, label) {
-    if (appState.selectedUnit && appState.selectedUnit.drawers) {
-        const drawer = appState.selectedUnit.drawers.find(d => d.id === drawerId);
-        if (drawer) {
-            drawer.label = label;
-            saveState();
-        }
-    }
-};
-
-window.updateDrawerColor = function(drawerId, color) {
-    if (appState.selectedUnit && appState.selectedUnit.drawers) {
-        const drawer = appState.selectedUnit.drawers.find(d => d.id === drawerId);
-        if (drawer) {
-            drawer.color = color;
-            document.querySelector(`[data-drawer-id="${drawerId}"] .drawer-color-picker`).style.backgroundColor = color;
-            hideColorOptions(drawerId);
-            saveState();
-        }
-    }
-};
-
-window.toggleColorOptions = function(drawerId) {
-    const colorOptions = document.getElementById(`colors-${drawerId}`);
-    if (colorOptions) {
-        colorOptions.classList.toggle('hidden');
-    }
-};
-
-window.hideColorOptions = function(drawerId) {
-    const colorOptions = document.getElementById(`colors-${drawerId}`);
-    if (colorOptions) {
-        colorOptions.classList.add('hidden');
-    }
-};
-
-// Load saved layout on startup
-window.addEventListener('load', function() {
-    const savedLayout = localStorage.getItem('shedLayout');
-    if (savedLayout) {
-        try {
-            const layout = JSON.parse(savedLayout);
-            loadLayoutData(layout);
-            showMessage('Previous layout restored', 'success');
-        } catch (error) {
-            console.error('Error loading saved layout:', error);
-        }
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    shedOrganizer = new ShedOrganizer();
 });
+
+// PWA install prompt
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Show install button or notification
+    const installBtn = document.createElement('button');
+    installBtn.textContent = '📱 Install App';
+    installBtn.className = 'btn btn--primary';
+    installBtn.style.position = 'fixed';
+    installBtn.style.top = '10px';
+    installBtn.style.right = '10px';
+    installBtn.style.zIndex = '1000';
+    
+    installBtn.addEventListener('click', () => {
+        installBtn.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    });
+    
+    document.body.appendChild(installBtn);
+});
+
+// Handle app install
+window.addEventListener('appinstalled', () => {
+    console.log('PWA was installed');
+});
+
+// Export for global access
+window.shedOrganizer = shedOrganizer;

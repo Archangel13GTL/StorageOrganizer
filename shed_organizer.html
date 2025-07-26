@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Shed Layout Organizer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#21808d">
+    <meta name="description" content="Mobile-first shed organization tool for 10x14 construction sheds">
+</head>
+<body>
+    <!-- Header Toolbar -->
+    <header class="toolbar">
+        <button id="menu-btn" class="btn btn--secondary" aria-label="Open tool palette">
+            <span class="hamburger">â°</span>
+        </button>
+        <h1 class="toolbar-title">Shed Organizer</h1>
+        <div class="toolbar-actions">
+            <button id="optimize-btn" class="btn btn--outline btn--sm" title="Safety Check">ð</button>
+            <button id="save-btn" class="btn btn--outline btn--sm" title="Save Layout">ð¾</button>
+            <button id="export-btn" class="btn btn--outline btn--sm" title="Export">ð¤</button>
+            <button id="undo-btn" class="btn btn--outline btn--sm" title="Undo">â¶</button>
+        </div>
+    </header>
+
+    <!-- Side Palette -->
+    <aside id="palette" class="palette hidden">
+        <div class="palette-header">
+            <h2>Storage Units</h2>
+            <button id="palette-close" class="btn btn--secondary btn--sm">â</button>
+        </div>
+        <div class="palette-content">
+            <!-- Storage Units Section -->
+            <div class="palette-section">
+                <h3>Units</h3>
+                <div class="storage-units-grid">
+                    <div class="storage-unit-item" data-type="cabinet" draggable="true">
+                        <div class="unit-icon">ðï¸</div>
+                        <div class="unit-info">
+                            <div class="unit-name">Cabinet</div>
+                            <div class="unit-size">36"Ã24"</div>
+                        </div>
+                    </div>
+                    <div class="storage-unit-item" data-type="fixedShelf" draggable="true">
+                        <div class="unit-icon">ð</div>
+                        <div class="unit-info">
+                            <div class="unit-name">Fixed Shelf</div>
+                            <div class="unit-size">42"Ã36"</div>
+                        </div>
+                    </div>
+                    <div class="storage-unit-item" data-type="centerShelf" draggable="true">
+                        <div class="unit-icon">ð¦</div>
+                        <div class="unit-info">
+                            <div class="unit-name">Center Shelf</div>
+                            <div class="unit-size">24"Ã42"</div>
+                            <div class="unit-mobile">ð Mobile</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tool Categories -->
+            <div class="palette-section">
+                <h3>Tool Categories</h3>
+                <div class="category-chips">
+                    <button class="category-chip active" data-category="hand">ð¨ Hand Tools</button>
+                    <button class="category-chip" data-category="power">â¡ Power Tools</button>
+                    <button class="category-chip" data-category="plumb">ð° Plumbing</button>
+                    <button class="category-chip" data-category="elect">â¡ Electrical</button>
+                    <button class="category-chip" data-category="fast">ð© Fasteners</button>
+                    <button class="category-chip" data-category="paint">ð¨ Paints</button>
+                    <button class="category-chip" data-category="safety">ð¦º Safety</button>
+                    <button class="category-chip" data-category="large">ðï¸ Large Equipment</button>
+                </div>
+                <div class="tools-grid" id="tools-grid">
+                    <!-- Tools will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Custom Tools -->
+            <div class="palette-section">
+                <h3>Custom Tools</h3>
+                <button id="add-custom-tool" class="btn btn--secondary btn--full-width">+ Add Custom Tool</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Layout Area -->
+    <main class="main-content">
+        <div class="shed-container">
+            <div class="shed-header">
+                <h2>10' Ã 14' Construction Shed</h2>
+                <div class="grid-controls">
+                    <button id="grid-toggle" class="btn btn--outline btn--sm">Grid</button>
+                    <button id="snap-toggle" class="btn btn--outline btn--sm active">Snap</button>
+                </div>
+            </div>
+            <div class="shed-wrapper">
+                <div id="shed-grid" class="shed-grid" tabindex="0">
+                    <!-- Grid cells will be generated by JavaScript -->
+                </div>
+                <div class="shed-overlay">
+                    <div class="dimensions-label">14 ft</div>
+                    <div class="dimensions-label vertical">10 ft</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Action Panel -->
+    <div class="bottom-panel">
+        <div class="panel-content">
+            <div class="unit-count">
+                <span id="cabinet-count">0</span> Cabinets â¢ 
+                <span id="shelf-count">0</span> Shelves â¢ 
+                <span id="tool-count">0</span> Tools
+            </div>
+            <div class="quick-actions">
+                <button id="clear-all" class="btn btn--outline btn--sm">Clear All</button>
+                <button id="auto-arrange" class="btn btn--primary btn--sm">Auto Arrange</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cabinet Drawer Modal -->
+    <div id="drawer-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="drawer-title">Cabinet Drawers</h3>
+                <button class="modal-close btn btn--secondary btn--sm">â</button>
+            </div>
+            <div class="modal-body">
+                <div class="drawer-editor">
+                    <div class="drawer-list" id="drawer-list">
+                        <!-- Drawers will be populated by JavaScript -->
+                    </div>
+                    <div class="drawer-controls">
+                        <button id="add-drawer" class="btn btn--secondary btn--sm">+ Add Drawer</button>
+                        <input type="color" id="drawer-color" value="#8B4513" title="Drawer Color">
+                    </div>
+                </div>
+                <div class="tools-assignment">
+                    <h4>Assign Tools to Drawers</h4>
+                    <div id="unassigned-tools" class="tools-pool">
+                        <!-- Unassigned tools will appear here -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-close btn btn--secondary">Cancel</button>
+                <button id="save-drawer" class="btn btn--primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optimization Results Modal -->
+    <div id="optimize-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Safety & Optimization Report</h3>
+                <button class="modal-close btn btn--secondary btn--sm">â</button>
+            </div>
+            <div class="modal-body">
+                <div id="optimization-results">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+                <div class="optimization-actions">
+                    <button id="apply-suggestions" class="btn btn--primary">Apply Suggestions</button>
+                    <button id="ignore-suggestions" class="btn btn--secondary">Ignore</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Tool Modal -->
+    <div id="custom-tool-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Custom Tool</h3>
+                <button class="modal-close btn btn--secondary btn--sm">â</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="tool-name">Tool Name</label>
+                    <input type="text" id="tool-name" class="form-control" placeholder="Enter tool name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="tool-emoji">Icon (Emoji)</label>
+                    <input type="text" id="tool-emoji" class="form-control" placeholder="ð§" maxlength="2">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="tool-category">Category</label>
+                    <select id="tool-category" class="form-control">
+                        <option value="hand">Hand Tools</option>
+                        <option value="power">Power Tools</option>
+                        <option value="plumb">Plumbing</option>
+                        <option value="elect">Electrical</option>
+                        <option value="fast">Fasteners</option>
+                        <option value="paint">Paints/Chemicals</option>
+                        <option value="safety">Safety Equipment</option>
+                        <option value="large">Large Equipment</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="tool-size">Size</label>
+                    <select id="tool-size" class="form-control">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                        <option value="xlarge">Extra Large</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="tool-heavy"> Heavy Item
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="tool-chemical"> Chemical/Hazardous
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-close btn btn--secondary">Cancel</button>
+                <button id="save-custom-tool" class="btn btn--primary">Add Tool</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import/Export Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export/Import Layout</h3>
+                <button class="modal-close btn btn--secondary btn--sm">â</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <button id="export-json" class="btn btn--primary btn--full-width mb-8">ð Export as JSON</button>
+                    <button id="export-pdf" class="btn btn--secondary btn--full-width mb-8">ð Export as PDF</button>
+                    <button id="share-layout" class="btn btn--outline btn--full-width mb-8">ð Share Layout</button>
+                </div>
+                <div class="import-section">
+                    <h4>Import Layout</h4>
+                    <input type="file" id="import-file" accept=".json" class="form-control">
+                    <button id="import-layout" class="btn btn--secondary btn--full-width mt-8">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden" role="alert"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Processing...</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
