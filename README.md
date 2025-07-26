@@ -1,5 +1,19 @@
 # Enhanced Shed Organizer - Complete Mobile-First Solution
 
+## 🚀 Live Demo
+
+[Interactive Shed Organizer – Launch Now](https://archangel13gtl.github.io/StorageOrganizer/)
+
+---
+
+## 🌐 Explore More
+
+- [🛡️ OPSEC Community](https://github.com/TeNeT-TechLab/OPSEC-Community) – Security training, resources, and open-source tools
+- [👨‍💻 My Developer Profile](https://github.com/Archangel13GTL)
+- [Other Projects](https://github.com/Archangel13GTL?tab=repositories)
+
+---
+
 🏗️ **A comprehensive, mobile-first shed organization and tool tracking application with advanced features and PWA capabilities.**
 
 [![Mobile-First](https://img.shields.io/badge/Design-Mobile--First-blue.svg)](https://developers.google.com/web/fundamentals/design-and-ux/principles/)
