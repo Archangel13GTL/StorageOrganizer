@@ -28,13 +28,13 @@
             <div class="header-content">
                 <h1 class="app-title">🏠 Shed Organizer</h1>
                 <div class="header-controls">
-                    <button id="themeToggle" class="btn btn--sm btn--outline" title="Toggle Theme">
+                    <button id="themeToggle" class="btn btn--sm btn--outline" title="Toggle Theme" aria-label="Toggle Theme">
                         <span class="theme-icon">🌙</span>
                     </button>
-                    <button id="viewToggle" class="btn btn--sm btn--primary" title="Toggle 3D View">
+                    <button id="viewToggle" class="btn btn--sm btn--primary" title="Toggle 3D View" aria-label="Toggle 3D View">
                         <span class="view-icon">📐</span> 2D
                     </button>
-                    <button id="menuToggle" class="btn btn--sm btn--outline" title="Menu">
+                    <button id="menuToggle" class="btn btn--sm btn--outline" title="Menu" aria-label="Open menu">
                         ☰
                     </button>
                 </div>
@@ -57,10 +57,10 @@
                     <div id="threeDView" class="three-d-view hidden">
                         <canvas id="threeDCanvas" width="400" height="300"></canvas>
                         <div class="three-d-controls">
-                            <button id="rotateLeft" class="btn btn--sm">↺</button>
-                            <button id="zoomIn" class="btn btn--sm">+</button>
-                            <button id="zoomOut" class="btn btn--sm">-</button>
-                            <button id="rotateRight" class="btn btn--sm">↻</button>
+                            <button id="rotateLeft" class="btn btn--sm" aria-label="Rotate Left">↺</button>
+                            <button id="zoomIn" class="btn btn--sm" aria-label="Zoom In">+</button>
+                            <button id="zoomOut" class="btn btn--sm" aria-label="Zoom Out">-</button>
+                            <button id="rotateRight" class="btn btn--sm" aria-label="Rotate Right">↻</button>
                         </div>
                     </div>
                 </div>
@@ -130,7 +130,7 @@
                                 <span class="tool-name">Wrench Set</span>
                             </div>
                             <div class="tool-item" data-tool="pliers">
-                                <span class="tool-icon">🪚</span>
+                                <span class="tool-icon">🗜️</span>
                                 <span class="tool-name">Pliers</span>
                             </div>
                             <div class="tool-item" data-tool="measuring_tape">
@@ -243,19 +243,19 @@
 
         <!-- Action Bar -->
         <div class="action-bar">
-            <button id="undoBtn" class="btn btn--sm btn--outline" title="Undo">
+            <button id="undoBtn" class="btn btn--sm btn--outline" title="Undo" aria-label="Undo last action">
                 ↶ Undo
             </button>
-            <button id="redoBtn" class="btn btn--sm btn--outline" title="Redo">
+            <button id="redoBtn" class="btn btn--sm btn--outline" title="Redo" aria-label="Redo last action">
                 ↷ Redo
             </button>
-            <button id="saveBtn" class="btn btn--sm btn--primary" title="Save Layout">
+            <button id="saveBtn" class="btn btn--sm btn--primary" title="Save Layout" aria-label="Save layout">
                 💾 Save
             </button>
-            <button id="loadBtn" class="btn btn--sm btn--outline" title="Load Layout">
+            <button id="loadBtn" class="btn btn--sm btn--outline" title="Load Layout" aria-label="Load layout">
                 📁 Load
             </button>
-            <button id="exportBtn" class="btn btn--sm btn--secondary" title="Export">
+            <button id="exportBtn" class="btn btn--sm btn--secondary" title="Export" aria-label="Export layout">
                 📤 Export
             </button>
         </div>
@@ -265,7 +265,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Organize Cabinet</h3>
-                    <button id="closeCabinetModal" class="btn btn--sm btn--outline">×</button>
+                    <button id="closeCabinetModal" class="btn btn--sm btn--outline" aria-label="Close organize cabinet modal">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="drawers-container">
@@ -302,6 +302,7 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
