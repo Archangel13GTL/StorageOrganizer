@@ -2,7 +2,7 @@
 
 ## 🚀 Live Demo
 
-[Interactive Shed Organizer – Launch Now]([index.html/](https://archangel13gtl.github.io/StorageOrganizer/))
+[Interactive Shed Organizer – Launch Now](https://archangel13gtl.github.io/StorageOrganizer/)
 
 ---
 
