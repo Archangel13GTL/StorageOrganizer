@@ -1135,5 +1135,3 @@ window.addEventListener('appinstalled', () => {
     console.log('PWA was installed');
 });
 
-// Export for global access
-window.shedOrganizer = shedOrganizer;
