@@ -899,9 +899,10 @@ class ShedOrganizer {
             timestamp: Date.now(),
             version: '1.0'
         };
-        
+
         localStorage.setItem('shedLayout', JSON.stringify(layout));
         this.showToast('💾 Layout saved successfully!');
+        this.getAISuggestions(layout);
     }
 
     loadLayout() {
@@ -1031,6 +1032,25 @@ class ShedOrganizer {
 
     hideLoadingIndicator() {
         document.getElementById('loadingIndicator').classList.add('hidden');
+    }
+
+    async getAISuggestions(layout) {
+        try {
+            this.showLoadingIndicator();
+            const getSuggestions = firebase.functions().httpsCallable('getAISuggestions');
+            const result = await getSuggestions({ layout });
+            const suggestions = result.data && result.data.suggestions;
+            if (suggestions && suggestions.length) {
+                this.showToast(`🤖 ${suggestions.join(' ')}`);
+            } else {
+                this.showToast('🤖 No suggestions available');
+            }
+        } catch (error) {
+            console.error('AI suggestion error:', error);
+            this.showToast('⚠️ Failed to get AI suggestions');
+        } finally {
+            this.hideLoadingIndicator();
+        }
     }
 
     setupVoiceCommands() {
