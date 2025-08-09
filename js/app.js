@@ -494,9 +494,11 @@ class ShedOrganizer {
         if (tools.classList.contains('hidden')) {
             tools.classList.remove('hidden');
             toggle.textContent = '▼';
+            toggle.setAttribute('aria-expanded', 'true');
         } else {
             tools.classList.add('hidden');
             toggle.textContent = '▶';
+            toggle.setAttribute('aria-expanded', 'false');
         }
     }
 
