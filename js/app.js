@@ -27,7 +27,7 @@ class ShedOrganizer {
         // Touch handling properties
         this.lastTap = 0;
         this.doubleTapDelay = 300;
-        this.longPressDelay = 200;
+        this.longPressDelay = 300;
         this.touchStartPos = { x: 0, y: 0 };
 
         // History for undo/redo
