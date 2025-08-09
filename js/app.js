@@ -1137,3 +1137,8 @@ window.addEventListener('appinstalled', () => {
 
 // Export for global access
 window.shedOrganizer = shedOrganizer;
+
+// Enable testing in Node environments
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { ShedOrganizer };
+}
