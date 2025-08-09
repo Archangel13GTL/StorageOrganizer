@@ -94,14 +94,15 @@ class ShedOrganizer {
         // 3D controls
         this.setup3DControls();
 
-        // Prevent default touch behaviors that interfere with our custom handling
-        document.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.shed-grid, .storage-unit, .tool-item')) {
+        // Prevent default touch behaviors only within the grid area
+        const grid = document.getElementById('shedGrid');
+        grid.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.grid-cell')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        document.addEventListener('touchmove', (e) => {
+        grid.addEventListener('touchmove', (e) => {
             if (this.isDragging) {
                 e.preventDefault();
             }
