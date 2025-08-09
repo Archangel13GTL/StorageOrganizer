@@ -1,0 +1,20 @@
+{
+  "name": "storageorganizer",
+  "version": "1.0.0",
+  "description": "[Interactive Shed Organizer – Launch Now]([index.html/](https://archangel13gtl.github.io/StorageOrganizer/))",
+  "main": "sw.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
+  }
+}

@@ -1102,7 +1102,7 @@ class ShedOrganizer {
 
     initializeServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('SW registered:', registration);
                 })
@@ -1155,5 +1155,3 @@ window.addEventListener('appinstalled', () => {
     console.log('PWA was installed');
 });
 
-// Export for global access
-window.shedOrganizer = shedOrganizer;
