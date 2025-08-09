@@ -1,0 +1,22 @@
+{
+  "name": "storage-organizer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "babel js --out-dir dist --presets=@babel/preset-env",
+    "test": "echo \"No tests\""
+  },
+  "browserslist": [
+    "Chrome 15"
+  ],
+  "dependencies": {
+    "classlist-polyfill": "^1.2.0",
+    "core-js": "^3.37.1",
+    "whatwg-fetch": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.0",
+    "@babel/preset-env": "^7.23.0"
+  }
+}
