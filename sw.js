@@ -1,12 +1,12 @@
 const CACHE_NAME = 'shed-organizer-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/js/app.js',
-  '/js/config.js',
-  '/icon.svg',
-  '/manifest.json'
+  './',
+  'index.html',
+  'style.css',
+  'js/app.js',
+  'js/config.js',
+  'icon.svg',
+  'manifest.json'
 ];
 
 self.addEventListener('install', event => {

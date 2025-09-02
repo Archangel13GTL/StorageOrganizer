@@ -27,7 +27,7 @@ class ShedOrganizer {
         // Touch handling properties
         this.lastTap = 0;
         this.doubleTapDelay = 300;
-        this.longPressDelay = 200;
+        this.longPressDelay = 300;
         this.touchStartPos = { x: 0, y: 0 };
 
         // History for undo/redo
@@ -94,14 +94,15 @@ class ShedOrganizer {
         // 3D controls
         this.setup3DControls();
 
-        // Prevent default touch behaviors that interfere with our custom handling
-        document.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.shed-grid, .storage-unit, .tool-item')) {
+        // Prevent default touch behaviors only within the grid area
+        const grid = document.getElementById('shedGrid');
+        grid.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.grid-cell')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        document.addEventListener('touchmove', (e) => {
+        grid.addEventListener('touchmove', (e) => {
             if (this.isDragging) {
                 e.preventDefault();
             }
@@ -494,9 +495,11 @@ class ShedOrganizer {
         if (tools.classList.contains('hidden')) {
             tools.classList.remove('hidden');
             toggle.textContent = '▼';
+            toggle.setAttribute('aria-expanded', 'true');
         } else {
             tools.classList.add('hidden');
             toggle.textContent = '▶';
+            toggle.setAttribute('aria-expanded', 'false');
         }
     }
 
@@ -899,9 +902,10 @@ class ShedOrganizer {
             timestamp: Date.now(),
             version: '1.0'
         };
-        
+
         localStorage.setItem('shedLayout', JSON.stringify(layout));
         this.showToast('💾 Layout saved successfully!');
+        this.getAISuggestions(layout);
     }
 
     loadLayout() {
@@ -1033,6 +1037,25 @@ class ShedOrganizer {
         document.getElementById('loadingIndicator').classList.add('hidden');
     }
 
+    async getAISuggestions(layout) {
+        try {
+            this.showLoadingIndicator();
+            const getSuggestions = firebase.functions().httpsCallable('getAISuggestions');
+            const result = await getSuggestions({ layout });
+            const suggestions = result.data && result.data.suggestions;
+            if (suggestions && suggestions.length) {
+                this.showToast(`🤖 ${suggestions.join(' ')}`);
+            } else {
+                this.showToast('🤖 No suggestions available');
+            }
+        } catch (error) {
+            console.error('AI suggestion error:', error);
+            this.showToast('⚠️ Failed to get AI suggestions');
+        } finally {
+            this.hideLoadingIndicator();
+        }
+    }
+
     setupVoiceCommands() {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1082,7 +1105,7 @@ class ShedOrganizer {
 
     initializeServiceWorker() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
                     console.log('SW registered:', registration);
                 })
@@ -1135,5 +1158,6 @@ window.addEventListener('appinstalled', () => {
     console.log('PWA was installed');
 });
 
-// Export for global access
-window.shedOrganizer = shedOrganizer;
+if (typeof module !== 'undefined') {
+    module.exports = { ShedOrganizer };
+}

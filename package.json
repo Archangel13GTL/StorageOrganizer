@@ -1,11 +1,16 @@
 {
-  "name": "storage-organizer",
+  "name": "storageorganizer",
   "version": "1.0.0",
-  "private": true,
+  "description": "[Interactive Shed Organizer – Launch Now]([index.html/](https://archangel13gtl.github.io/StorageOrganizer/))",
+  "main": "sw.js",
   "scripts": {
     "build": "babel js --out-dir dist --presets=@babel/preset-env",
-    "test": "echo \"No tests\""
+    "test": "jest"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "browserslist": [
     "Chrome 15"
   ],
@@ -17,6 +22,11 @@
   "devDependencies": {
     "@babel/cli": "^7.23.0",
     "@babel/core": "^7.23.0",
-    "@babel/preset-env": "^7.23.0"
+    "@babel/preset-env": "^7.23.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5"
+  },
+  "jest": {
+    "testEnvironment": "jsdom"
   }
 }
